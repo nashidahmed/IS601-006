@@ -9,7 +9,6 @@ def process_array(num, arr):
     print(arr)
     print("\nPositive Output:\n")
     # TODO add new code here to print the desired result
-    # nn379 Feb 2 2023
     # Loop through the array range using len to catch a hold of the index so we can modify the array values if needed
     for i in range(len(arr)):
         # Check if the element is negative else leave the element as is
