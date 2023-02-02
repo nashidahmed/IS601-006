@@ -9,6 +9,9 @@ def process_array(num, arr):
     print(arr)
     print("\nOdds output:\n")
     # TODO add necessary print statement to output only the odd values (hint, best if shown as a single line)
+    # nn379 Feb 2 2023
+    # Get the odd values from the array using list comprehension and display them
+    print([num for num in arr if num % 2 == 1])
 
 
 print("Problem 1")
