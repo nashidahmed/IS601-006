@@ -140,7 +140,7 @@ def view_task(index):
 
 def delete_task(index):
     """ deletes a task from the tasks list by index """
-    # nn379 6 Feb 2023
+    # nn379 7 Feb 2023
     if 0 <= index < len(tasks):
         tasks.pop(index)
         print('Task deleted successfully!')
@@ -151,18 +151,14 @@ def delete_task(index):
 
 def get_incomplete_tasks():
     """ prints a list of tasks that are not done """
-    # generate a list of tasks where the task is not done
-    # pass that list into list_tasks()
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
-    _tasks = []
+    # nn379 7 Feb 2023
+    _tasks = [task for task in tasks if not task['done']]
     list_tasks(_tasks)
 
 def get_overdue_tasks():
     """ prints a list of tasks that are over due completion (not done and expired) """
-    # generate a list of tasks where the due date is older than now and that are not complete
-    # pass that list into list_tasks()
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
-    _tasks = []
+    # nn379 7 Feb 2023
+    _tasks = [task for task in tasks if str_to_datetime(str(task['due'])) < datetime.now() and not task['done']]
     list_tasks(_tasks)
 
 def get_time_remaining(index):
