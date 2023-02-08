@@ -99,11 +99,14 @@ def mark_done(index):
 
 def view_task(index):
     """ View more info about a specific task fetch by index """
-    # find task from list by index
-    # consider index out of bounds scenarios and include appropriate message(s) for invalid index
-    # utilize the given print statement when a task is found
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
+    # nn379 6 Feb 2023
     task = {}
+    if 0 <= index < len(tasks):
+        task = tasks[index]
+    else:
+        print('Task does not exist')
+        return
+    
     print(f"""
         [{'x' if task['done'] else ' '}] Task: {task['name']}\n 
         Description: {task['description']} \n 
