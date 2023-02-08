@@ -51,6 +51,7 @@ def add_task(name: str, description: str, due: str):
     """ Copies the TASK_TEMPLATE and fills in the passed in data then adds the task to the tasks list """
     task = TASK_TEMPLATE.copy() # don't delete this
     # nn379 6 Feb 2023
+    # Check if all the fields are entered, if they are assign lastActivity to the current time, set the name, description and due date, also check if the due date entered is of a valid date format, then add the add task, If all the fields are not entered, inform the user and exit the function 
     if name and description and due:
         task['lastActivity'] = datetime.now()
         task['name'], task['description'] = name, description
@@ -163,13 +164,35 @@ def get_overdue_tasks():
 
 def get_time_remaining(index):
     """ outputs the number of days, hours, minutes, seconds a task has before it's overdue otherwise shows similar info for how far past due it is """
-    # get the task by index
-    # consider index out of bounds scenarios and include appropriate message(s) for invalid index
-    # get the days, hours, minutes, seconds between the due date and now
-    # display the remaining time via print in a clear format showing days, hours, minutes, seconds
-    # if the due date is in the past print out how many days, hours, minutes, seconds the task is over due (clearly note that it's over due, values should be positive)
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
+    # nn379 7 Feb 2023
     task = {}
+    if 0 <= index < len(tasks):
+        task = tasks[index]
+    else:
+        print('Task does not exist')
+        return
+
+    now = datetime.now()
+    due = str_to_datetime(str(task['due']))
+    remaining_time = due - now if due > now else now - due
+
+    days = remaining_time.days
+    hours = remaining_time.seconds // 3600
+    minutes = (remaining_time.seconds//60) % 60
+    seconds = remaining_time.seconds % 60
+
+    days_str = (f'{days} day' if days == 1 else f'{days} days') if days > 0 else ''
+    hours_str = (f'{hours} hour' if hours == 1 else f'{hours} hours') if hours > 0 else ''
+    minutes_str = (f'{minutes} minute' if minutes == 1 else f'{minutes} minutes') if minutes > 0 else ''
+    seconds_str = (f'{seconds} second' if seconds == 1 else f'{seconds} seconds') if seconds > 0 else ''
+
+    remaining_time_list = [days_str, hours_str, minutes_str, seconds_str]
+    remaining_time_str = ', '.join(filter(None, remaining_time_list))
+
+    if due > now:
+        print(f'This task is due in {remaining_time_str}')
+    else:
+        print(f'The task is overdue by {remaining_time_str}')
 
 # no changes needed below this line
 
