@@ -60,9 +60,10 @@ def add_task(name: str, description: str, due: str):
             print('Invalid date format entered. Task not added. Try again.')
             return
         tasks.append(task)
-        print('New task added')
+        print('New task added.')
     else:
         print('All fields must be provided. Task not added.')
+        return
 
     save()
 
@@ -80,8 +81,6 @@ def process_update(index):
 
 def update_task(index: int, name: str, description:str, due: str):
     """ Updates the name, description , due date of a task found by index if an update to the property was provided """
-    # update incoming task data if it's provided (if it's not provided use the original task property value)
-    # update lastActivity with the current datetime value
     # output that the task was updated if any items were changed, otherwise mention task was not updated
     # nn379 7 Feb 2023
     task = tasks[index]
@@ -94,22 +93,30 @@ def update_task(index: int, name: str, description:str, due: str):
             return
         task['lastActivity'] = datetime.now()
         task['name'], task['description'] = name or task['name'], description or task['description']
-        print('Task updated successfully')
+        print('Task updated successfully.')
     else:
-        print('No input entered')
+        print('No input entered. Task not updated.')
         return
     
     save()
 
 def mark_done(index):
     """ Updates a single task, via index, to a done datetime"""
-    # find task from list by index
-    # consider index out of bounds scenarios and include appropriate message(s) for invalid index
-    # if it's not done, record the current datetime as the value
-    # if it is done, print a message saying it's already completed
-    # make sure save() is still called last in this function
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
-
+    # nn379 7 Feb 2023
+    task = {}
+    if 0 <= index < len(tasks):
+        task = tasks[index]
+    else:
+        print('Task does not exist')
+        return
+    
+    if not task['done']:
+        task['done'] = datetime.now()
+        print(f'Task {index + 1} marked as done')
+    else:
+        print('Task already completed.')
+        return
+    
     save()
 
 def view_task(index):
