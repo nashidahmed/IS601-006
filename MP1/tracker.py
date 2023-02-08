@@ -51,38 +51,53 @@ def add_task(name: str, description: str, due: str):
     """ Copies the TASK_TEMPLATE and fills in the passed in data then adds the task to the tasks list """
     task = TASK_TEMPLATE.copy() # don't delete this
     # nn379 6 Feb 2023
-    task['lastActivity'] = datetime.now()
-    task['name'], task['description'], task['due'] = name, description, str_to_datetime(due)
-
-    if task['name'] and task['description'] and task['due']:
+    if name and description and due:
+        task['lastActivity'] = datetime.now()
+        task['name'], task['description'] = name, description
+        try:
+            task['due'] = str_to_datetime(due)
+        except:
+            print('Invalid date format entered. Task not added. Try again.')
+            return
         tasks.append(task)
         print('New task added')
     else:
-        print('Cannot add task due to incorrect input')
+        print('All fields must be provided. Task not added.')
 
     save()
 
 def process_update(index):
     """ extracted the user input prompts to get task data then passes it to update_task() """
-    # get the task by index
-    # consider index out of bounds scenarios and include appropriate message(s) for invalid index
-    # show the existing value of each property where the TODOs are marked in the text of the inputs (replace the TODO related text)
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
-    
-    name = input(f"What's the name of this task? (TODO name) \n").strip()
-    desc = input(f"What's a brief descriptions of this task? (TODO description) \n").strip()
-    due = input(f"When is this task due (format: m/d/y H:M:S) (TODO due) \n").strip()
-    update_task(index, name=name, description=desc, due=due)
+    # nn379 7 Feb 2023
+    if 0 <= index < len(tasks):
+        task = tasks[index]
+        name = input(f"What's the name of this task? ({task['name']}) \n").strip()
+        desc = input(f"What's a brief descriptions of this task? ({task['description']}) \n").strip()
+        due = input(f"When is this task due (format: m/d/y H:M:S) ({task['due']}) \n").strip()
+        update_task(index, name=name, description=desc, due=due)
+    else:
+        print('Task does not exist')
 
 def update_task(index: int, name: str, description:str, due: str):
     """ Updates the name, description , due date of a task found by index if an update to the property was provided """
-    # find the task by index
-    # consider index out of bounds scenarios and include appropriate message(s) for invalid index
     # update incoming task data if it's provided (if it's not provided use the original task property value)
     # update lastActivity with the current datetime value
     # output that the task was updated if any items were changed, otherwise mention task was not updated
-    # make sure save() is still called last in this function
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
+    # nn379 7 Feb 2023
+    task = tasks[index]
+
+    if name or description or due:
+        try:
+            task['due'] = due and str_to_datetime(due) or task['due']
+        except:
+            print('Invalid date format entered. Task not updated. Try again.')
+            return
+        task['lastActivity'] = datetime.now()
+        task['name'], task['description'] = name or task['name'], description or task['description']
+        print('Task updated successfully')
+    else:
+        print('No input entered')
+        return
     
     save()
 
