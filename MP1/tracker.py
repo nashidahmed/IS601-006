@@ -60,7 +60,7 @@ def add_task(name: str, description: str, due: str):
             print('Invalid date format entered. Task not added. Try again.')
             return
         tasks.append(task)
-        print('New task added.')
+        print('New task added!')
     else:
         print('All fields must be provided. Task not added.')
         return
@@ -93,7 +93,7 @@ def update_task(index: int, name: str, description:str, due: str):
             return
         task['lastActivity'] = datetime.now()
         task['name'], task['description'] = name or task['name'], description or task['description']
-        print('Task updated successfully.')
+        print('Task updated successfully!')
     else:
         print('No input entered. Task not updated.')
         return
@@ -140,12 +140,13 @@ def view_task(index):
 
 def delete_task(index):
     """ deletes a task from the tasks list by index """
-    # delete/remove task from list by index
-    # message should show if it was successful or not
-    # consider index out of bounds scenarios and include appropriate message(s) for invalid index
-    # make sure save() is still called last in this function
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
-    
+    # nn379 6 Feb 2023
+    if 0 <= index < len(tasks):
+        tasks.pop(index)
+        print('Task deleted successfully!')
+    else:
+        print('Task does not exist')
+
     save()
 
 def get_incomplete_tasks():
