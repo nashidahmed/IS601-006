@@ -50,13 +50,16 @@ def list_tasks(_tasks):
 def add_task(name: str, description: str, due: str):
     """ Copies the TASK_TEMPLATE and fills in the passed in data then adds the task to the tasks list """
     task = TASK_TEMPLATE.copy() # don't delete this
-    # update lastActivity with the current datetime value
-    # set the name, description, and due date (all must be provided)
-    # due date must match one of the formats mentioned in str_to_datetime()
-    # add the new task to the tasks list
-    # output a message confirming the new task was added or if the addition was rejected due to missing data
-    # make sure save() is still called last in this function
-    # include your ucid and date as a comment of when you implemented this, briefly summarize the solution
+    # nn379 6 Feb 2023
+    task['lastActivity'] = datetime.now()
+    task['name'], task['description'], task['due'] = name, description, str_to_datetime(due)
+
+    if task['name'] and task['description'] and task['due']:
+        tasks.append(task)
+        print('New task added')
+    else:
+        print('Cannot add task due to incorrect input')
+
     save()
 
 def process_update(index):
