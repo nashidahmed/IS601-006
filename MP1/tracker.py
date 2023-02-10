@@ -51,7 +51,11 @@ def add_task(name: str, description: str, due: str):
     """ Copies the TASK_TEMPLATE and fills in the passed in data then adds the task to the tasks list """
     task = TASK_TEMPLATE.copy() # don't delete this
     # nn379 6 Feb 2023
-    # Check if all the fields are entered, if they are assign lastActivity to the current time, set the name, description and due date, also check if the due date entered is of a valid date format, then add the add task, If all the fields are not entered, inform the user and exit the function 
+    # Check if all the fields are entered. If they are not, inform the user and exit the function, if they are, then:
+    # 1. Assign lastActivity to the current time.
+    # 2. Set the name, description and due date.
+    # 3. Before setting the due date, check if the value entered is of a valid date format.
+    # 4. Add the task to the tasks list.
     if name and description and due:
         task['lastActivity'] = datetime.now()
         task['name'], task['description'] = name, description
@@ -63,7 +67,10 @@ def add_task(name: str, description: str, due: str):
         tasks.append(task)
         print('New task added!')
     else:
-        print('All fields must be provided. Task not added.')
+        if not name: print('No name given.', end=' ')
+        if not description: print('No description given.', end=' ')
+        if not due: print('No due date given.', end=' ')
+        print('Task not added.')
         return
 
     save()
@@ -71,6 +78,7 @@ def add_task(name: str, description: str, due: str):
 def process_update(index):
     """ extracted the user input prompts to get task data then passes it to update_task() """
     # nn379 7 Feb 2023
+    # Check if the index exists in the tasks list, if so, request the user for the name, description and due date and call update_task, else inform the user that the task does not exist
     if 0 <= index < len(tasks):
         task = tasks[index]
         name = input(f"What's the name of this task? ({task['name']}) \n").strip()
@@ -78,13 +86,23 @@ def process_update(index):
         due = input(f"When is this task due (format: m/d/y H:M:S) ({task['due']}) \n").strip()
         update_task(index, name=name, description=desc, due=due)
     else:
-        print('Task does not exist')
+        print('Task does not exist.')
 
 def update_task(index: int, name: str, description:str, due: str):
     """ Updates the name, description , due date of a task found by index if an update to the property was provided """
     # output that the task was updated if any items were changed, otherwise mention task was not updated
     # nn379 7 Feb 2023
-    task = tasks[index]
+    # Get a valid task from the tasks list and check if the user has entered any values. If they have not, inform the user that the task has not been updated. If they have then:
+    # 1. Assign lastActivity to the current time.
+    # 2. Update the name, description or due date if they have been entered by the user, else keep the existing values
+    # 3. Before setting the due date, check if the value entered is of a valid date format.
+    # 4. Update the task and inform the user.
+    task = {}
+    if 0 <= index < len(tasks):
+        task = tasks[index]
+    else:
+        print('Task does not exist.')
+        return
 
     if name or description or due:
         try:
@@ -104,16 +122,17 @@ def update_task(index: int, name: str, description:str, due: str):
 def mark_done(index):
     """ Updates a single task, via index, to a done datetime"""
     # nn379 7 Feb 2023
+    # Get a valid task from the tasks list and check if it is done, if it is not done, set the current datetime to the 'done' else inform the user that the task is already completed.
     task = {}
     if 0 <= index < len(tasks):
         task = tasks[index]
     else:
-        print('Task does not exist')
+        print('Task does not exist.')
         return
     
     if not task['done']:
         task['done'] = datetime.now()
-        print(f'Task {index + 1} marked as done')
+        print(f'Task {index + 1} marked as done.')
     else:
         print('Task already completed.')
         return
@@ -123,11 +142,12 @@ def mark_done(index):
 def view_task(index):
     """ View more info about a specific task fetch by index """
     # nn379 6 Feb 2023
+    # Get a valid task from the tasks list and print the details of the task.
     task = {}
     if 0 <= index < len(tasks):
         task = tasks[index]
     else:
-        print('Task does not exist')
+        print('Task does not exist.')
         return
     
     print(f"""
@@ -142,34 +162,43 @@ def view_task(index):
 def delete_task(index):
     """ deletes a task from the tasks list by index """
     # nn379 7 Feb 2023
+    # Get a valid task from the tasks list and delete the task by popping it from the tasks list.
     if 0 <= index < len(tasks):
         tasks.pop(index)
         print('Task deleted successfully!')
     else:
-        print('Task does not exist')
+        print('Task does not exist.')
 
     save()
 
 def get_incomplete_tasks():
     """ prints a list of tasks that are not done """
     # nn379 7 Feb 2023
+    # Get the incomplete tasks from the tasks list by filtering out the tasks which have 'done' as false using list comprehension
     _tasks = [task for task in tasks if not task['done']]
     list_tasks(_tasks)
 
 def get_overdue_tasks():
     """ prints a list of tasks that are over due completion (not done and expired) """
     # nn379 7 Feb 2023
+    # Get the overdue tasks from the tasks list by filtering out the tasks that have 'due' before the current time and 'done' as false using list comprehension 
     _tasks = [task for task in tasks if str_to_datetime(str(task['due'])) < datetime.now() and not task['done']]
     list_tasks(_tasks)
 
 def get_time_remaining(index):
     """ outputs the number of days, hours, minutes, seconds a task has before it's overdue otherwise shows similar info for how far past due it is """
     # nn379 7 Feb 2023
+    # 1. Get a valid task from the tasks list
+    # 2. Convert the 'due' time to datetime format and get the unformatted remainining time by simply finding the difference between the 'due' time and current time. Check which is later and use that as the first value when finding the difference.
+    # 3. Compute the days, hours, minutes and seconds from the remaining time.
+    # 4. Produce the string for days, hours, minutes and seconds separately accounting for plural if days, minutes, hours or seconds are more than one. If they are equal to 0, they are given empty string as value so they can filtered out in the next step. 
+    # 5. Use join and filter out the empty strings to get a clean output for the days, hours, mintues and seconds.
+    # 6. Check if the task is due or overdue and print out the remaining time accordingly.
     task = {}
     if 0 <= index < len(tasks):
         task = tasks[index]
     else:
-        print('Task does not exist')
+        print('Task does not exist.')
         return
 
     now = datetime.now()
@@ -190,9 +219,9 @@ def get_time_remaining(index):
     remaining_time_str = ', '.join(filter(None, remaining_time_list))
 
     if due > now:
-        print(f'This task is due in {remaining_time_str}')
+        print(f'This task is due in {remaining_time_str}.')
     else:
-        print(f'The task is overdue by {remaining_time_str}')
+        print(f'The task is overdue by {remaining_time_str}.')
 
 # no changes needed below this line
 
