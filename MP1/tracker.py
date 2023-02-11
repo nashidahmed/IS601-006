@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import os
 
 tasks = []
 # constant, don't edit, use .copy()
@@ -28,7 +29,10 @@ def save():
 
 def load():
     """ loads the task list from a json file """
+    if not os.path.isfile("tracker.json"):
+        return
     f = open("tracker.json", "r")
+
     data = json.load(f)
     # Note about global keyword: https://stackoverflow.com/a/11867510
     global tasks
@@ -54,8 +58,8 @@ def add_task(name: str, description: str, due: str):
     # Check if all the fields are entered. If they are not, inform the user and exit the function, if they are, then:
     # 1. Assign lastActivity to the current time.
     # 2. Set the name, description and due date.
-    # 3. Before setting the due date, check if the value entered is of a valid date format.
-    # 4. Add the task to the tasks list.
+    # 3. Before setting the due date, check if the value entered is of a valid date format, else exit the function.
+    # 4. Add the new task to the tasks list.
     if name and description and due:
         task['lastActivity'] = datetime.now()
         task['name'], task['description'] = name, description
