@@ -13,31 +13,10 @@ class MyCalc:
         '-': operator.sub
     }
 
-    # @staticmethod
-    # def _is_float(val):
-    #     try:
-    #         float(val)
-    #         return True
-    #     except:
-    #         return False
-
-    # @staticmethod
-    # def _is_int(val):
-    #     try:
-    #         int(val)
-    #         return True
-    #     except:
-    #         return False
-
     @staticmethod
     def _as_number(val):
         try:
             return Decimal(val)
-        # if MyCalc._is_float(val):
-        #     return Decimal(val)
-        # elif MyCalc._is_int(val):
-        #     return int(val)
-        # else:
         except:
             raise Exception('Not a number.')
 
