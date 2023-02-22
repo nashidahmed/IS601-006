@@ -8,9 +8,10 @@ class Test_MyCalc:
     def my_calc(self):
         return MyCalc()
     
+    # nn379 17 Feb 2023
     @pytest.fixture
     def data_number(self):
-        # Data inputs for different test cases along with their outputs
+        """ Data inputs for different test cases along with their outputs for data without 'ans' input """
         return [{
             "operand1": "3",
             "operand2": "5",
@@ -38,8 +39,10 @@ class Test_MyCalc:
             "negative": True,
         }]
     
+    # nn379 17 Feb 2023
     @pytest.fixture
     def data_ans(self, my_calc):
+        """ Data inputs for different test cases along with their outputs for data with 'ans' input """
         my_calc.ans = 5
         return [{
             "operand1": "ans",
@@ -57,14 +60,18 @@ class Test_MyCalc:
             "resDiv": "0.84"
         }]
     
-    
-
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_number which is the data set for number strings and not 'ans', '+' and 'resAdd'
     def test_number_add_number(self, my_calc, data_number):
         test_helper(my_calc, data_number, '+', 'resAdd')
                 
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_ans which is the data set for number strings which may contain 'ans', '+' and 'resAdd'
     def test_ans_add_number(self, my_calc, data_ans):
         test_helper(my_calc, data_ans, '+', 'resAdd')
 
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_number which is the data set for number strings and not 'ans', '-' and 'resSub'
     def test_number_sub_number(self, my_calc, data_number):
         # Add two test cases to the existing data set for the two cases where the first number or second number is negative
         data_number.extend([{
@@ -78,18 +85,25 @@ class Test_MyCalc:
         }])
         test_helper(my_calc, data_number, '-', 'resSub')
 
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_ans which is the data set for number strings which may contain 'ans', '-' and 'resSub'
     def test_ans_sub_number(self, my_calc, data_ans):
         test_helper(my_calc, data_ans, '-', 'resSub')
 
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_number which is the data set for number strings and not 'ans', '*' or 'x' and 'resMul'
     def test_number_mul_number(self, my_calc, data_number):
         test_helper(my_calc, data_number, '*', 'resMul')
 
-
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_ans which is the data set for number strings which may contain 'ans', '*' or 'x' and 'resMul'
     def test_ans_mul_number(self, my_calc, data_ans):
         test_helper(my_calc, data_ans, 'x', 'resMul')
 
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_number which is the data set for number strings and not 'ans', '/' and 'resDiv'
     def test_number_div_number(self, my_calc, data_number):
-        # Add the test case to check what happens when the user tries to divide by 0
+        # Add the test case to check if exception is thrown when the user tries to divide by 0
         data_number.append({
             "operand1": "5",
             "operand2": "0",
@@ -98,11 +112,24 @@ class Test_MyCalc:
         })
         test_helper(my_calc, data_number, '/', 'resDiv')
 
+    # nn379 17 Feb 2023
+    # Call the test helper function with the my_calc instance, data_ans which is the data set for number strings which may contain 'ans', '/' and 'resDiv'
     def test_ans_div_number(self, my_calc, data_ans):
         test_helper(my_calc, data_ans, '/', 'resDiv')
 
-# Test helper function to test the calculator
+# nn379 17 Feb 2023
+# This function takes in 4 parameters, namely:
+# 1. 'my_calc' class instance which is obtained through a fixture.
+# 2. 'data' which is obtained through a fixture
+# 3. 'operation' which is passed in from the respective test cases as per what operation needs to be performed on the two numbers.
+# 4. 'res' which is the name of the key in the data list of dictonaries for the result of the respective operation
+# The function loops over the data and the following takes place:
+# 1. If 'negative' does not exist in the dict, it is a positive test case, assert that the result of the calc() is as expected. Convert to Decimal since the calc() returns a Decimal
+# 2. Else, if 'negative' exists in the dict, check if it is a ZeroDivisionError test case or not
+# 3. If is not a ZeroDivisionError test case, check if the exception returned is not a number
+# 4. Else, it is a ZeroDivisionError test case, so check if the exception returned is cannot divide by zero
 def test_helper(my_calc, data, operation, res):
+    """ test helper function to test the calculator """
     for d in data:
         if 'negative' not in d:
             r = my_calc.calc(d['operand1'], operation, d['operand2'])
