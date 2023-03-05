@@ -128,6 +128,7 @@ class Test_MyCalc:
 # 2. Else, if 'negative' exists in the dict, check if it is a ZeroDivisionError test case or not
 # 3. If is not a ZeroDivisionError test case, check if the exception returned is not a number
 # 4. Else, it is a ZeroDivisionError test case, so check if the exception returned is cannot divide by zero
+@pytest.mark.skip(reason="test_helper is a helper function")
 def test_helper(my_calc, data, operation, res):
     """ test helper function to test the calculator """
     for d in data:
