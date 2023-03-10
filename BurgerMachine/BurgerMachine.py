@@ -17,6 +17,7 @@ class Usable:
     def use(self):
         self.quantity -= 1
         if (self.quantity < 0):
+            # Raise an exception and inform the user that the item they chose is out of stock in the category
             raise OutOfStockException(f'{self} {self.__class__.__name__.lower()} is out of stock')
         return self.quantity 
 
@@ -83,6 +84,7 @@ class BurgerMachine:
                 self.inprogress_burger.append(c)
                 return
         # nn379 Mar 2 2023
+        # Inform the user that the item they entered does not exist in the category
         raise InvalidChoiceException(f'{choice} is not a valid choice of {self.currently_selecting.name.lower()}')
 
     def pick_patty(self, choice):
@@ -179,6 +181,7 @@ class BurgerMachine:
             elif self.currently_selecting == STAGE.Pay:
                 # nn379 Mar 2 2023
                 expected = self.calculate_cost()
+                # Use string formatting to display the expected value in currency format
                 total = input(f"Your total is ${expected:.2f}, please enter the exact value.\n$")
                 self.handle_pay(expected, total.strip())
                 
@@ -194,19 +197,26 @@ class BurgerMachine:
             sys.exit()
         # nn379 Mar 2 2023
         except OutOfStockException as e:
+            # Print the exception message from the OutOfStockException
             print(e)
         except NeedsCleaningException:
+            # The while loop asks the user to type 'clean' to clean the machine.
+            # 1. If any other input is entered, the user is informed that the machine was not cleaned and asked to type again.
+            # 2. When the user types clean, clean_machine is called and the user is informed that the machine has been cleaned
             while(input("The burger machine needs cleaning. Type 'clean' to clean the machine\n") != 'clean'):
                 print('The machine was not cleaned')
             else:
                 self.clean_machine()
                 print('The machine was cleaned')
         except InvalidChoiceException as e:
+            # Print the exception message from the InvalidChoiceException
             print(e)
         except ExceededRemainingChoicesException:
+            # Inform the user that they cannot add any more items in that category and the force stage to move to the next category.
             print(f'You cannot add any more {self.currently_selecting.name.lower()}')
             self.currently_selecting = STAGE(self.currently_selecting.value + 1)
         except InvalidPaymentException:
+            # Inform the user that they have entered an incorrect amount
             print('You have entered an incorrect amount')
         except:
             print("Something went wrong")
