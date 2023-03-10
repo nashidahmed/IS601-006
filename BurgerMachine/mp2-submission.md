@@ -1,6 +1,6 @@
 <table><tr><td> <em>Assignment: </em> IS601 - Mini Project 2 - Burgers</td></tr>
 <tr><td> <em>Student: </em> Nashid Ahmed Shah Nashid Ahmed Shah (nn379)</td></tr>
-<tr><td> <em>Generated: </em> 3/5/2023 4:49:32 PM</td></tr>
+<tr><td> <em>Generated: </em> 3/9/2023 11:32:13 PM</td></tr>
 <tr><td> <em>Grading Link: </em> <a rel="noreferrer noopener" href="https://learn.ethereallab.app/homework/IS601-006-S23/is601-mini-project-2-burgers/grade/nn379" target="_blank">Grading</a></td></tr></table>
 <table><tr><td> <em>Instructions: </em> <ol><li>Create a new branch per the desired branch name below</li><li>Add the baseline files from the following link:&nbsp;<a href="https://gist.github.com/MattToegel/028db0e3fd2b20c1fb8e284b341292bb">https://gist.github.com/MattToegel/028db0e3fd2b20c1fb8e284b341292bb</a>&nbsp;</li><li>Put them into a subfolder in your repository folder (I called my folder BurgerMachine)</li><li>git add .</li><li>git commit -m "baseline files"</li><li>git push origin (name of desired branch below)</li><li>You can go to github and open the pull request for evidence capturing later (don't close/merge the pull request until you're done with the assignment)</li><li>Do the below tasks and fill in the below entries</li><ol><li>git add/commit after any significant changes to build up history</li></ol><li>Save the input and generate the submission markdown file (copy to clipboard or download the file)</li><li>Name it something relevant to the assignment if it's not named already</li><li>git add the submission file</li><li>git commit the submission file</li><li>git push the submission file</li><li>Complete the pull request to dev</li><li>Create a pull request from dev to prod</li><li>Go to the prod branch on github, navigate to the submission file</li><li>Paste that link to Canvas</li></ol></td></tr></table>
 <table><tr><td> <em>Deliverable 1: </em> Code Changes - Add the calculate_cost() implementation </td></tr><tr><td><em>Status: </em> <img width="100" height="20" src="https://user-images.githubusercontent.com/54863474/211707773-e6aef7cb-d5b2-4053-bbb1-b09fc609041e.png"></td></tr>
@@ -8,7 +8,7 @@
 <tr><td><table><tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/222978791-5fa104a7-7f9d-4d14-a8a7-2cbee5cdd01f.png"/></td></tr>
 <tr><td> <em>Caption:</em> <p>Showing the implementation of the calculate_cost function<br></p>
 </td></tr>
-<tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/222978890-90e5dc2a-fd3d-4cdb-bd35-26427bae2a9c.png"/></td></tr>
+<tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/224223484-fdaf382c-b18c-4670-9b2f-f0cca35d8c95.png"/></td></tr>
 <tr><td> <em>Caption:</em> <p>Showing that the input message correctly displays the value in currency format with<br>the $ symbol<br></p>
 </td></tr>
 </table></td></tr>
@@ -17,18 +17,18 @@
 </table></td></tr>
 <table><tr><td> <em>Deliverable 2: </em> Exception Handling </td></tr><tr><td><em>Status: </em> <img width="100" height="20" src="https://user-images.githubusercontent.com/54863474/211707773-e6aef7cb-d5b2-4053-bbb1-b09fc609041e.png"></td></tr>
 <tr><td><table><tr><td> <em>Sub-Task 1: </em> Screenshot(s) of adjusted code to handle exceptions</td></tr>
-<tr><td><table><tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/222979393-385a1904-9f09-4bd4-b08b-9dd7b620baeb.png"/></td></tr>
+<tr><td><table><tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/224223327-8abbbc02-b1c1-499b-a5e8-1fac293e5b15.png"/></td></tr>
 <tr><td> <em>Caption:</em> <p>Showing the exception message raised by OutOfStockException<br></p>
 </td></tr>
-<tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/222979461-6fc00c46-7bda-4af5-a633-20b9b5825298.png"/></td></tr>
+<tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/224223621-70da079c-0279-491e-96ba-81aa5790385d.png"/></td></tr>
 <tr><td> <em>Caption:</em> <p>Showing how all the exceptions are handled in the run function<br></p>
 </td></tr>
-<tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/222979420-6dda90d3-2038-40a8-a591-a1b45b146fb6.png"/></td></tr>
+<tr><td><img width="768px" src="https://user-images.githubusercontent.com/37153833/224223419-a78049d1-1222-4b72-964a-9772ba476908.png"/></td></tr>
 <tr><td> <em>Caption:</em> <p>Showing how InvalidChoiceException is raised where choice is the chosen item&#39;s name and<br>the second variable gives the stage/category name<br></p>
 </td></tr>
 </table></td></tr>
 <tr><td> <em>Sub-Task 2: </em> Summarize each exception handling process</td></tr>
-<tr><td> <em>Response:</em> <ul><li><font size="2"><b style="">OutOfStockException - </b>Use <b style="">self</b> since it returns the name of<br>the item and <b style="">self.__class__.__name__ </b>to get the name of the category through<br>the class name to show relevant message of exactly which item from which<br>category is out of stock.<br></font></li><li><font size="2"><b>NeedsCleaningException - </b>Use a while loop asking the<br>user to type 'clean' to clean the machine. If any other input is<br>entered, the user is informed that the machine was not cleaned and asked<br>to type again. When the user types clean, <b>clean_machine </b>is called and the<br>user is informed that the machine has been cleaned.<br></font></li><li><font size="2"><b>InvalidChoiceException - </b>When the<br>user enters choices which don't exist in the category, the user is informed<br>that what they requested for is not a valid choice for that category.</font></li><li><font<br>size="2"><b style="">ExceededRemainingChoicesException - </b>The user is informed that they cannot add any more<br>items in that category and the stage progresses to the next category.</font></li><li><font size="2"><b<br>style="">InvalidPaymentException - </b>The user is informed that they have entered an incorrect amount</font><br></li></ul><br></td></tr>
+<tr><td> <em>Response:</em> <ul><li><font size="2"><b style="">OutOfStockException - </b>Use <b style="">self</b> since it returns the name of<br>the item and <b style="">self.__class__.__name__ </b>to get the category's name through the class<br>name to show the relevant message of exactly which item from which category<br>is out of stock.<br></font></li><li><font size="2"><b>NeedsCleaningException - </b>Use a while loop asking the user<br>to type 'clean' to clean the machine. If any other input is entered,<br>the user is informed that the machine was not cleaned and asked to<br>type again. When the user types clean, <b>clean_machine </b>is called and the user<br>is informed that the machine has been cleaned.<br></font></li><li><font size="2"><b>InvalidChoiceException - </b>When the user<br>enters choices that don't exist in the category, the user is informed that<br>what they requested is not a valid choice for that category.</font></li><li><font size="2"><b style="">ExceededRemainingChoicesException<br>- </b>The user is informed that they cannot add any more items in<br>that category and the stage progresses to the next category.</font></li><li><font size="2"><b style="">InvalidPaymentException -<br></b>The user is informed that they have entered an incorrect amount</font><br></li></ul><br></td></tr>
 </table></td></tr>
 <table><tr><td> <em>Deliverable 3: </em> Test Cases </td></tr><tr><td><em>Status: </em> <img width="100" height="20" src="https://user-images.githubusercontent.com/54863474/211707773-e6aef7cb-d5b2-4053-bbb1-b09fc609041e.png"></td></tr>
 <tr><td><table><tr><td> <em>Sub-Task 1: </em> Screenshot(s) of test cases per the checklist</td></tr>
