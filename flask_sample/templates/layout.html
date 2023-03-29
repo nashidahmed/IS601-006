@@ -16,13 +16,19 @@
       height: 60px;
       line-height: 60px;
     }
+
+    .header {
+      top: 0;
+      height: 60px;
+      line-height: 60px;
+    }
   </style>
   <title>{% block title %}{% endblock %} - Sample</title>
   {% endblock %}
 </head>
 
 <body>
-  <div id="header" class="header bg-light text-center">
+  <div id="header">
     <nav class="navbar navbar-expand-lg bg-light">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Sample</a>
@@ -42,6 +48,7 @@
         </div>
       </div>
     </nav>
+    {% include 'flash.html' %}
   </div>
   <div id="content">{% block content %}{% endblock %}</div>
   <div id="footer" class="footer bg-light text-center">
