@@ -9,8 +9,7 @@ def search():
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
-    query = """SELECT ...
-     FROM ... LEFT JOIN ... WHERE 1=1"""
+    query = "SELECT e.id, first_name, last_name, email, company_id, name FROM IS601_MP3_Employees as e LEFT JOIN IS601_MP3_Companies as c ON company_id = c.id WHERE 1=1"
     args = {} # <--- add values to replace %s/%(named)s placeholders
     allowed_columns = ["first_name", "last_name", "email", "company_name"]
     # TODO search-2 get fn, ln, email, company, column, order, limit from request args
@@ -21,16 +20,45 @@ def search():
     # TODO search-7 append sorting if column and order are provided and within the allowed columns and order options (asc, desc)
     # TODO search-8 append limit (default 10) or limit greater than 1 and less than or equal to 100
     # TODO search-9 provide a proper error message if limit isn't a number or if it's out of bounds
+    fn = request.args.get('fn')
+    ln = request.args.get('ln')
+    email = request.args.get('email')
+    company = request.args.get('company')
+    col = request.args.get("column")
+    order = request.args.get("order")
+    limit = request.args.get("limit", 10) # TODO change this per the above requirements
 
-    limit = 10 # TODO change this per the above requirements
-    query += " LIMIT %(limit)s"
-    args["limit"] = limit
+    if fn:
+      query += " AND first_name like %(first_name)s"
+      args['first_name'] = f"%{fn}%"
+    if ln:
+      query += " AND last_name like %(last_name)s"
+      args['last_name'] = f"%{ln}%"
+    if email:
+      query += " AND email like %(email)s"
+      args['email'] = f"%{email}%"
+    if company:
+      query += " AND company_id = %(company)s"
+      args['company'] = company
+    if col and order:
+        if col in allowed_columns and order in ["asc", "desc"]:
+            query += f" ORDER BY {col} {order}"
+
+    if limit and int(limit) > 1 and int(limit) <= 100:
+        # technically this should follow the same rules as col/order
+        # but it seems to work with the placeholder mapping with
+        # this connector
+        query += " LIMIT %(limit)s"
+        args['limit'] = limit
+    else:
+        flash('Limit out of bounds', 'danger')
     print("query",query)
     print("args", args)
     try:
         result = DB.selectAll(query, args)
         if result.status:
             rows = result.rows
+            print(rows)
     except Exception as e:
         # TODO search-10 make message user friendly
         flash(e, "error")
@@ -59,7 +87,7 @@ def add():
             if not last_name: flash('Last name is required', 'danger')
             if not email: flash('Email is required', 'danger')
             elif not re.match(r"[^@]+@[^@]+\.[^@]+", email): flash('Incorrect email address format', 'danger')
-            return render_template("add_employee.html", fn=first_name, ln=last_name, email=email, company=company)
+            return render_template("add_employee.html", request=request, ln=last_name, email=email, company=company)
 
         has_error = False # use this to control whether or not an insert occurs
             
