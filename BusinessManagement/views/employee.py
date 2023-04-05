@@ -49,7 +49,7 @@ def search():
         # but it seems to work with the placeholder mapping with
         # this connector
         query += " LIMIT %(limit)s"
-        args['limit'] = limit
+        args['limit'] = int(limit)
     else:
         flash('Limit out of bounds', 'danger')
     print("query",query)
@@ -77,37 +77,36 @@ def add():
         # TODO add-4 company (may be None)
         # TODO add-5 email is required (flash proper error message)
         # TODO add-5a verify email is in the correct format
-        first_name = request.form.get('fn')
-        last_name = request.form.get('ln')
+        has_error = False # use this to control whether or not an insert occurs
+        fn = request.form.get('fn')
+        ln = request.form.get('ln')
         email = request.form.get('email')
         company = request.form.get('company')
 
-        if not first_name or not last_name or not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            if not first_name: flash('First name is required', 'danger')
-            if not last_name: flash('Last name is required', 'danger')
-            if not email: flash('Email is required', 'danger')
-            elif not re.match(r"[^@]+@[^@]+\.[^@]+", email): flash('Incorrect email address format', 'danger')
-            return render_template("add_employee.html", request=request, ln=last_name, email=email, company=company)
-
-        has_error = False # use this to control whether or not an insert occurs
+        if not fn or not ln or not email or not re.match(r"^\S+@\S+\.\S+$", email):
+            if not fn: flash('First name is required', 'danger')
+            if not ln: flash('Last name is required', 'danger')
+            flash('Email is required', 'danger') if not email else flash('Incorrect email address format', 'danger')
+            has_error = True
             
         if not has_error:
             try:
                 result = DB.insertOne("INSERT INTO IS601_MP3_Employees (first_name, last_name, company_id, email) VALUES (%s, %s, %s, %s)",
-                first_name, last_name, company, email) # <-- TODO add-6 add query and add arguments
+                fn, ln, company, email) # <-- TODO add-6 add query and add arguments
                 if result.status:
                     flash("Created Employee Record", "success")
             except Exception as e:
                 # TODO add-7 make message user friendly
-                flash(str(e), "danger")
-    return render_template("add_employee.html")
+                flash('Employee was not inserted. Check your input.', "danger")
+    return render_template("add_employee.html", request=request)
 
 @employee.route("/edit", methods=["GET", "POST"])
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
-    id = False
+    id = request.args.get('id')
     if not id: # TODO update this for TODO edit-1
-        pass
+        flash('Invalid Employee ID', "danger")
+        return redirect(url_for('employee.search'))
     else:
         if request.method == "POST":
             
@@ -118,37 +117,44 @@ def edit():
             # TODO edit-5 email is required (flash proper error message)
             # TODO edit-5a verify email is in the correct format
             has_error = False # use this to control whether or not an insert occurs
+            fn = request.form.get('fn')
+            ln = request.form.get('ln')
+            email = request.form.get('email')
+            company = request.form.get('company', None)
 
+            if not fn or not ln or not email or not re.match(r"^\S+@\S+\.\S+$", email):
+                if not fn: flash('First name is required', 'danger')
+                if not ln: flash('Last name is required', 'danger')
+                flash('Email is required', 'danger') if not email else flash('Incorrect email address format', 'danger')
+                has_error = True
             
                 
             if not has_error:
                 try:
                     # TODO edit-6 fill in proper update query
-                    result = DB.update("""
-                    UPDATE ... SET
-                    ...
-                    """, ...)
+                    result = DB.update("UPDATE IS601_MP3_Employees SET first_name = %s, last_name = %s, email = %s, company_id = %s WHERE id = %s", fn, ln, email, company, int(id))
                     if result.status:
                         flash("Updated record", "success")
                 except Exception as e:
                     # TODO edit-7 make this user-friendly
-                    flash(e, "danger")
+                    print(str(e))
+                    flash('Employee was not updated', "danger")
         row = {}
         try:
             # TODO edit-8 fetch the updated data 
-            result = DB.selectOne("""SELECT 
-            ...
-            FROM ... LEFT JOIN ... 
-              
-              WHERE ..."""
-            , id)
+            result = DB.selectOne("SELECT first_name, last_name, company_id, email FROM IS601_MP3_Employees as e LEFT JOIN IS601_MP3_Companies as c ON company_id = c.id WHERE e.id = %s", int(id))
             if result.status:
                 row = result.row
+            if row is None:
+                flash('Invalid Employee ID', "danger")
+                return redirect(url_for('employee.search'))
         except Exception as e:
             # TODO edit-9 make this user-friendly
-            flash(str(e), "danger")
+            print(str(e))
+            flash('Could not fetch updated data', "danger")
+            
     # TODO edit-10 pass the employee data to the render template
-    return render_template("edit_employee.html", ...)
+    return render_template("edit_employee.html", employee=row)
 
 @employee.route("/delete", methods=["GET"])
 def delete():
