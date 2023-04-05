@@ -80,21 +80,41 @@ def add():
         # note: call zip variable zipcode as zip is a built in function it could lead to issues
 
         has_error = False # use this to control whether or not an insert occurs
-        
+        name = request.form.get('name')
+        address = request.form.get('address')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        country = request.form.get('country')
+        website = request.form.get('website')
+        zipcode = request.form.get('zip')
 
+        if not name:
+          flash('Name is required', 'danger')
+          has_error = True
+        if not address:
+          flash('Address is required', 'danger')
+          has_error = True
+        if not city:
+          flash('City is required', 'danger')
+          has_error = True
+        if not state:
+          flash('State is required', 'danger')
+          has_error = True
+        if not country:
+          flash('Country is required', 'danger')
+          has_error = True
+        if not zipcode:
+          flash('Zip is required', 'danger')
+          has_error = True
+          
         if not has_error:
             try:
-                result = DB.insertOne("""
-                INSERT INTO ...
-                ...
-                VALUES
-                ...
-                """, ...) # <-- TODO add-8 add query and add arguments
+                result = DB.insertOne("INSERT INTO IS601_MP3_Companies (name, address, city, state, country, website, zip) VALUES (%s, %s, %s, %s, %s, %s, %s)", name, address, city, state, country, website, zipcode) # <-- TODO add-8 add query and add arguments
                 if result.status:
                     flash("Added Company", "success")
             except Exception as e:
                 # TODO add-9 make message user friendly
-                flash(str(e), "danger")
+                flash('Company was not inserted. Check your input.', "danger")
         
     return render_template("add_company.html")
 

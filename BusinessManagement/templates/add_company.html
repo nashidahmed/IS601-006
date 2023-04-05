@@ -4,24 +4,43 @@
 {% from "country_state_selector.html" import country_state_selector %}
 
 <div class="container-fluid">
-    <div class="h1">Add Company</div>
-    <div>
-        <form method="POST">
-            {#
-            using regular html generate fields (labels and input) with proper types for
-            name (required)
-            address (required)
-            city (required) (can be a text field, doesn't need to be a valid city)
-            state/country (required) (given)
-            zip (required)
-            website (optional)
-            if a validation error occurs, the inserted form data should persist
-            #}
+  <div class="h1">Add Company</div>
+  <div>
+    <form method="POST">
+      {#
+      using regular html generate fields (labels and input) with proper types for
+      name (required)
+      address (required)
+      city (required) (can be a text field, doesn't need to be a valid city)
+      state/country (required) (given)
+      zip (required)
+      website (optional)
+      if a validation error occurs, the inserted form data should persist
+      #}
+      <label class="form-label" for="name">Name</label>
+      <input type="text" class="form-control mb-3" placeholder="name" name="name"
+        value="{{request.form.get('name') or ''}}" />
 
-            {# use this for country/state selection #}
-            {{country_state_selector()}}
-            <input type="submit" class="btn btn-primary" value="Save Company" />
-        </form>
-    </div>
+      <label class="form-label" for="address">Address</label>
+      <input type="text" class="form-control mb-3" placeholder="Address" name="address"
+        value="{{request.form.get('address') or ''}}" />
+
+      <label class="form-label" for="city">City</label>
+      <input type="text" class="form-control mb-3" placeholder="City" name="city"
+        value="{{request.form.get('city') or ''}}" />
+
+      <label class="form-label" for="website">Website</label>
+      <input type="text" class="form-control mb-3" placeholder="Website" name="website"
+        value="{{request.form.get('website') or ''}}" />
+
+      <label class="form-label" for="zip">Zip</label>
+      <input type="text" class="form-control mb-3" placeholder="Zip" name="zip"
+        value="{{request.form.get('zip') or ''}}" />
+
+      {# use this for country/state selection #}
+      {{country_state_selector()}}
+      <input type="submit" class="btn btn-primary" value="Save Company" />
+    </form>
+  </div>
 </div>
 {% endblock %}
