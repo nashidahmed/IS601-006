@@ -44,14 +44,15 @@ def search():
         if col in allowed_columns and order in ["asc", "desc"]:
             query += f" ORDER BY {col} {order}"
 
-    if limit and int(limit) > 1 and int(limit) <= 100:
+    if limit and int(limit) >= 1 and int(limit) <= 100:
         # technically this should follow the same rules as col/order
         # but it seems to work with the placeholder mapping with
         # this connector
         query += " LIMIT %(limit)s"
         args['limit'] = int(limit)
     else:
-        flash('Limit out of bounds', 'danger')
+        flash('Limit out of bounds (Limit bound: 0 < Limit <= 100)', 'danger')
+        return render_template("list_employees.html", rows=rows, allowed_columns=allowed_columns)
     print("query",query)
     print("args", args)
     try:

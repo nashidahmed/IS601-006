@@ -9,7 +9,7 @@ def search():
     # TODO search-1 retrieve id, name, address, city, country, state, zip, website, employee count as employees for the company
     # don't do SELECT *
     
-    query = "... WHERE 1=1"
+    query = "SELECT c.id, name, address, city, country, state, zip, website, count(e.id) as employees FROM IS601_MP3_Companies as c LEFT JOIN IS601_MP3_Employees as e ON c.id = e.company_id WHERE 1=1"
     args = {} # <--- add values to replace %s/%(named)s placeholders
     allowed_columns = ["name", "city", "country", "state"]
     # TODO search-2 get name, country, state, column, order, limit request args
@@ -19,11 +19,32 @@ def search():
     # TODO search-6 append sorting if column and order are provided and within the allows columsn and allowed order asc,desc
     # TODO search-7 append limit (default 10) or limit greater than 1 and less than or equal to 100
     # TODO search-8 provide a proper error message if limit isn't a number or if it's out of bounds
-    
+    name = request.args.get('name')
+    country = request.args.get('country')
+    state = request.args.get('state')
+    col = request.args.get("column")
+    order = request.args.get("order")
+    limit = request.args.get("limit", 10) # TODO change this per the above requirements
 
-    limit = 10 # TODO change this per the above requirements
-    query += " LIMIT %(limit)s"
-    args["limit"] = limit
+    if name:
+      query += " AND name like %(name)s"
+      args['name'] = f"%{name}%"
+    if country:
+      query += " AND country = %(country)s"
+      args['country'] = country
+    if state:
+      query += " AND state = %(state)s"
+      args['state'] = state
+    query += " GROUP BY c.id"
+    if col and order:
+        if col in allowed_columns and order in ["asc", "desc"]:
+            query += f" ORDER BY {col} {order}"
+    if limit and int(limit) >= 1 and int(limit) <= 100:
+        query += " LIMIT %(limit)s"
+        args['limit'] = int(limit)
+    else:
+        flash('Limit out of bounds (Limit bound: 0 < Limit <= 100)', 'danger')
+        return render_template("list_companies.html", rows=rows, allowed_columns=allowed_columns)
     print("query",query)
     print("args", args)
     try:
