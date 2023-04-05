@@ -1,5 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, flash, url_for
 from sql.db import DB
+import re
 employee = Blueprint('employee', __name__, url_prefix='/employee')
 
 
@@ -48,14 +49,24 @@ def add():
         # TODO add-4 company (may be None)
         # TODO add-5 email is required (flash proper error message)
         # TODO add-5a verify email is in the correct format
+        first_name = request.form.get('fn')
+        last_name = request.form.get('ln')
+        email = request.form.get('email')
+        company = request.form.get('company')
+
+        if not first_name or not last_name or not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            if not first_name: flash('First name is required', 'danger')
+            if not last_name: flash('Last name is required', 'danger')
+            if not email: flash('Email is required', 'danger')
+            elif not re.match(r"[^@]+@[^@]+\.[^@]+", email): flash('Incorrect email address format', 'danger')
+            return render_template("add_employee.html", fn=first_name, ln=last_name, email=email, company=company)
+
         has_error = False # use this to control whether or not an insert occurs
             
         if not has_error:
             try:
-                result = DB.insertOne("""
-                INSERT INTO ...
-                """, ...
-                ) # <-- TODO add-6 add query and add arguments
+                result = DB.insertOne("INSERT INTO IS601_MP3_Employees (first_name, last_name, company_id, email) VALUES (%s, %s, %s, %s)",
+                first_name, last_name, company, email) # <-- TODO add-6 add query and add arguments
                 if result.status:
                     flash("Created Employee Record", "success")
             except Exception as e:
