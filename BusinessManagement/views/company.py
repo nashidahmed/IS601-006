@@ -121,9 +121,10 @@ def add():
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
-    id = False
+    id = request.args.get('id')
     if not id: # TODO update this for TODO edit-1
-        pass
+        flash('Invalid Company ID', "danger")
+        return redirect(url_for('company.search'))
     else:
         if request.method == "POST":
             data = {"id": id} # use this as needed, can convert to tuple if necessary
@@ -143,17 +144,38 @@ def edit():
             # note: call zip variable zipcode as zip is a built in function it could lead to issues
             # populate data dict with mappings
             has_error = False # use this to control whether or not an insert occurs
+            name = request.form.get('name')
+            address = request.form.get('address')
+            city = request.form.get('city')
+            state = request.form.get('state')
+            country = request.form.get('country')
+            website = request.form.get('website')
+            zipcode = request.form.get('zip')
 
+            if not name:
+              flash('Name is required', 'danger')
+              has_error = True
+            if not address:
+              flash('Address is required', 'danger')
+              has_error = True
+            if not city:
+              flash('City is required', 'danger')
+              has_error = True
+            if not state:
+              flash('State is required', 'danger')
+              has_error = True
+            if not country:
+              flash('Country is required', 'danger')
+              has_error = True
+            if not zipcode:
+              flash('Zip is required', 'danger')
+              has_error = True
             
             if not has_error:
                 try:
                     # TODO edit-9 fill in proper update query
                     # name, address, city, state, country, zip, website
-                    result = DB.update("""
-                    UPDATE ...
-                    SET
-                    ...
-                    """, data)
+                    result = DB.update("UPDATE IS601_MP3_Companies SET name = %s, address = %s, city = %s, state = %s, country = %s, website = %s, zip = %s WHERE id = %s", name, address, city, state, country, website, zipcode, id)
                     if result.status:
                         print("updated record")
                         flash("Updated record", "success")
@@ -164,15 +186,18 @@ def edit():
         row = {}
         try:
             # TODO edit-11 fetch the updated data
-            result = DB.selectOne("SELECT ... FROM ... WHERE ...", id)
+            result = DB.selectOne("SELECT name, address, city, state, country, website, zip FROM IS601_MP3_Companies WHERE id = %s", int(id))
             if result.status:
                 row = result.row
-                
+            if row is None:
+                flash('Company ID does not exist', "danger")
+                return redirect(url_for('company.search'))
         except Exception as e:
             # TODO edit-12 make this user-friendly
-            flash(str(e), "danger")
+            print(str(e))
+            flash('Could not fetch updated data', "danger")
     # TODO edit-13 pass the company data to the render template
-    return render_template("edit_company.html", ...)
+    return render_template("edit_company.html", company = row)
 
 @company.route("/delete", methods=["GET"])
 def delete():
