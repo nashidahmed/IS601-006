@@ -9,7 +9,11 @@ def search():
     # TODO search-1 retrieve id, name, address, city, country, state, zip, website, employee count as employees for the company
     # don't do SELECT *
     
-    query = "SELECT c.id, name, address, city, country, state, zip, website, count(e.id) as employees FROM IS601_MP3_Companies as c LEFT JOIN IS601_MP3_Employees as e ON c.id = e.company_id WHERE 1=1"
+    query = """SELECT c.id, name, address, city, country, state, zip, website, count(e.id) as employees
+    FROM IS601_MP3_Companies as c
+    LEFT JOIN IS601_MP3_Employees as e
+    ON c.id = e.company_id
+    WHERE 1=1"""
     args = {} # <--- add values to replace %s/%(named)s placeholders
     allowed_columns = ["name", "city", "country", "state"]
     # TODO search-2 get name, country, state, column, order, limit request args
@@ -52,7 +56,6 @@ def search():
         #print(f"result {result.rows}")
         if result.status:
             rows = result.rows
-            print(f"rows {rows}")
     except Exception as e:
         # TODO search-9 make message user friendly
         flash(str(e), "danger")
@@ -109,7 +112,9 @@ def add():
           
         if not has_error:
             try:
-                result = DB.insertOne("INSERT INTO IS601_MP3_Companies (name, address, city, state, country, website, zip) VALUES (%s, %s, %s, %s, %s, %s, %s)", name, address, city, state, country, website, zipcode) # <-- TODO add-8 add query and add arguments
+                result = DB.insertOne("""INSERT INTO IS601_MP3_Companies (name, address, city, state, country, website, zip)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+                , name, address, city, state, country, website, zipcode) # <-- TODO add-8 add query and add arguments
                 if result.status:
                     flash("Added Company", "success")
             except Exception as e:
@@ -144,49 +149,41 @@ def edit():
             # note: call zip variable zipcode as zip is a built in function it could lead to issues
             # populate data dict with mappings
             has_error = False # use this to control whether or not an insert occurs
-            name = request.form.get('name')
-            address = request.form.get('address')
-            city = request.form.get('city')
-            state = request.form.get('state')
-            country = request.form.get('country')
-            website = request.form.get('website')
-            zipcode = request.form.get('zip')
+            data['name'] = request.form.get('name')
+            data['address'] = request.form.get('address')
+            data['city'] = request.form.get('city')
+            data['state'] = request.form.get('state')
+            data['country'] = request.form.get('country')
+            data['website'] = request.form.get('website', None)
+            data['zipcode'] = request.form.get('zip')
 
-            if not name:
-              flash('Name is required', 'danger')
-              has_error = True
-            if not address:
-              flash('Address is required', 'danger')
-              has_error = True
-            if not city:
-              flash('City is required', 'danger')
-              has_error = True
-            if not state:
-              flash('State is required', 'danger')
-              has_error = True
-            if not country:
-              flash('Country is required', 'danger')
-              has_error = True
-            if not zipcode:
-              flash('Zip is required', 'danger')
-              has_error = True
+            for k, v in data.items():
+                if not v:
+                   flash(f"{k.capitalize() if k != 'zipcode' else 'Zip'} is required", 'danger')
+                   has_error = True
             
             if not has_error:
                 try:
                     # TODO edit-9 fill in proper update query
                     # name, address, city, state, country, zip, website
-                    result = DB.update("UPDATE IS601_MP3_Companies SET name = %s, address = %s, city = %s, state = %s, country = %s, website = %s, zip = %s WHERE id = %s", name, address, city, state, country, website, zipcode, id)
+                    result = DB.update("""UPDATE IS601_MP3_Companies
+                    SET name = %(name)s, address = %(address)s, city = %(city)s, state = %(state)s, country = %(country)s, website = %(website)s, zip = %(zipcode)s
+                    WHERE id = %(id)s"""
+                    , data)
                     if result.status:
                         print("updated record")
                         flash("Updated record", "success")
                 except Exception as e:
                     # TODO edit-10 make this user-friendly
                     print(f"{e}")
-                    flash(str(e), "danger")
+                    flash('Update was not successful', "danger")
         row = {}
         try:
             # TODO edit-11 fetch the updated data
-            result = DB.selectOne("SELECT name, address, city, state, country, website, zip FROM IS601_MP3_Companies WHERE id = %s", int(id))
+            result = DB.selectOne("""SELECT name, address, city, state, country, website, zip
+            FROM IS601_MP3_Companies
+            WHERE id = %s"""
+            , int(id))
             if result.status:
                 row = result.row
             if row is None:
@@ -207,5 +204,33 @@ def delete():
     # TODO delete-4 ensure a flash message shows for successful delete
     # TODO delete-5 for all employees assigned to this company set their company_id to None/null
     # TODO delete-6 if id is missing, flash necessary message and redirect to search
-    pass
+    id = request.args.get('id')
+    args = {**request.args}
+    print(args)
+    if not id: # TODO update this for TODO edit-1
+        flash('Invalid Company ID', "danger")
+    else:
+        try:
+            result = DB.delete("""UPDATE IS601_MP3_Employees
+            SET company_id = %s
+            WHERE company_id = %s"""
+            , None, int(id))
+            if result.status:
+                print('Unallocated employees')
+        except Exception as e:
+            print(str(e))
+            flash('Could not set employees\' company to null')
+        try:
+            result = DB.delete("""DELETE FROM IS601_MP3_Companies
+            WHERE id = %s"""
+            , int(id))
+            if result.status:
+                flash(f'Company id: {id}  deleted', "success")
+        except Exception as e:
+            print(str(e))
+            flash('Could not delete company.', "danger")
+
+        del args['id']
+    return redirect(url_for('company.search', **args))
+
     

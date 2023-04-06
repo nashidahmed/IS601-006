@@ -71,7 +71,8 @@
           {% endif %}
           {% endfor %}
           <td><a href="{{url_for('company.edit', id=row.get('id'))}}" class="btn btn-secondary btn-sm">Edit</a>
-            <a href="{{url_for('company.delete', id=row.get('id'))}}" class="btn btn-danger btn-sm">x</a>
+            <a href="{{url_for('company.delete', id=row.get('id'), **request.args)}}"
+              class="btn btn-danger btn-sm">x</a>
           </td>
         </tr>
         {% endfor %}

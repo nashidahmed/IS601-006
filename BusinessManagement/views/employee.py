@@ -9,7 +9,11 @@ def search():
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
-    query = "SELECT e.id, first_name, last_name, email, company_id, name FROM IS601_MP3_Employees as e LEFT JOIN IS601_MP3_Companies as c ON company_id = c.id WHERE 1=1"
+    query = """SELECT e.id, first_name, last_name, email, company_id, name
+    FROM IS601_MP3_Employees as e
+    LEFT JOIN IS601_MP3_Companies as c
+    ON company_id = c.id
+    WHERE 1=1"""
     args = {} # <--- add values to replace %s/%(named)s placeholders
     allowed_columns = ["first_name", "last_name", "email", "company_name"]
     # TODO search-2 get fn, ln, email, company, column, order, limit from request args
@@ -59,7 +63,6 @@ def search():
         result = DB.selectAll(query, args)
         if result.status:
             rows = result.rows
-            print(rows)
     except Exception as e:
         # TODO search-10 make message user friendly
         flash(e, "error")
@@ -82,7 +85,7 @@ def add():
         fn = request.form.get('fn')
         ln = request.form.get('ln')
         email = request.form.get('email')
-        company = request.form.get('company')
+        company = request.form.get('company', None)
 
         if not fn or not ln or not email or not re.match(r"^\S+@\S+\.\S+$", email):
             if not fn: flash('First name is required', 'danger')
@@ -92,8 +95,9 @@ def add():
             
         if not has_error:
             try:
-                result = DB.insertOne("INSERT INTO IS601_MP3_Employees (first_name, last_name, company_id, email) VALUES (%s, %s, %s, %s)",
-                fn, ln, company, email) # <-- TODO add-6 add query and add arguments
+                result = DB.insertOne("""INSERT INTO IS601_MP3_Employees (first_name, last_name, company_id, email)
+                VALUES (%s, %s, %s, %s)"""
+                , fn, ln, company, email) # <-- TODO add-6 add query and add arguments
                 if result.status:
                     flash("Created Employee Record", "success")
             except Exception as e:
@@ -121,7 +125,7 @@ def edit():
             fn = request.form.get('fn')
             ln = request.form.get('ln')
             email = request.form.get('email')
-            company = request.form.get('company', None)
+            company = request.form.get('company')
 
             if not fn or not ln or not email or not re.match(r"^\S+@\S+\.\S+$", email):
                 if not fn: flash('First name is required', 'danger')
@@ -133,7 +137,10 @@ def edit():
             if not has_error:
                 try:
                     # TODO edit-6 fill in proper update query
-                    result = DB.update("UPDATE IS601_MP3_Employees SET first_name = %s, last_name = %s, email = %s, company_id = %s WHERE id = %s", fn, ln, email, company, int(id))
+                    result = DB.update("""UPDATE IS601_MP3_Employees
+                    SET first_name = %s, last_name = %s, email = %s, company_id = %s
+                    WHERE id = %s"""
+                    , fn, ln, email, company or None, int(id))
                     if result.status:
                         flash("Updated record", "success")
                 except Exception as e:
@@ -143,11 +150,14 @@ def edit():
         row = {}
         try:
             # TODO edit-8 fetch the updated data 
-            result = DB.selectOne("SELECT first_name, last_name, company_id, email FROM IS601_MP3_Employees as e LEFT JOIN IS601_MP3_Companies as c ON company_id = c.id WHERE e.id = %s", int(id))
+            result = DB.selectOne("""SELECT first_name, last_name, company_id, email
+            FROM IS601_MP3_Employees
+            WHERE id = %s"""
+            , int(id))
             if result.status:
                 row = result.row
             if row is None:
-                flash('Invalid Employee ID', "danger")
+                flash('Employee ID does not exist', "danger")
                 return redirect(url_for('employee.search'))
         except Exception as e:
             # TODO edit-9 make this user-friendly
@@ -164,4 +174,21 @@ def delete():
     # TODO delete-3 pass all argument except id to this route
     # TODO delete-4 ensure a flash message shows for successful delete
     # TODO delete-5 if id is missing, flash necessary message and redirect to search
-    pass
+    id = request.args.get('id')
+    args = {**request.args}
+    print(args)
+    if not id: # TODO update this for TODO edit-1
+        flash('Invalid Employee ID', "danger")
+    else:
+        try:
+            result = DB.delete("""DELETE FROM IS601_MP3_Employees
+            WHERE id = %s"""
+            , int(id))
+            if result.status:
+                flash(f'Employee id: {id} deleted', "success")
+        except Exception as e:
+            print(str(e))
+            flash('Could not delete employee.', "danger")
+
+        del args['id']
+    return redirect(url_for("employee.search", **args))
