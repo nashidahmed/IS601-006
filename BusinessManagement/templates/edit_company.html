@@ -31,11 +31,11 @@
       <input type="text" class="form-control mb-3" placeholder="Website" name="website"
         value="{{company.website or ''}}" />
 
-      <label class="form-label" for="zip">Zip</label>
-      <input type="text" class="form-control mb-3" placeholder="Zip" name="zip" value="{{company.zip or ''}}" />
-
       {# use this for country/state selection #}
       {{country_state_selector(country=company.country, state=company.state)}}
+
+      <label class="form-label" for="zip">Zip</label>
+      <input type="text" class="form-control mb-3" placeholder="Zip" name="zip" value="{{company.zip or ''}}" />
 
       <input type="submit" class="btn btn-primary" value="Save Company" />
     </form>
