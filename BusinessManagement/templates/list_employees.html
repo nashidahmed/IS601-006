@@ -72,12 +72,8 @@
       #}
       {% for row in rows %}
       <tr>
-        {% for k in row.keys() %}
-        {% if k == 'name' and row[k] == None %}
-        <td>N/A</td>
-        {% else %}
-        <td>{{row[k]}}</td>
-        {% endif %}
+        {% for v in row.values() %}
+        <td>{{v or 'N/A'}}</td>
         {% endfor %}
         <td><a href="{{url_for('employee.edit', id=row.get('id'))}}" class="btn btn-secondary btn-sm">Edit</a>
           <a href="{{url_for('employee.delete', id=row.get('id'), **request.args)}}" class="btn btn-danger btn-sm">x</a>

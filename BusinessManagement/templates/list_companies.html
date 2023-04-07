@@ -61,13 +61,13 @@
         #}
         {% for row in rows %}
         <tr>
-          {% for k in row.keys() %}
-          {% if k == 'website' %}
+          {% for k, v in row.items() %}
+          {% if k == 'website' and v %}
           <td>
-            <a href="{{row[k]}}" target="_blank">website</a>
+            <a href="{{v}}" target="_blank">website</a>
           </td>
           {% else %}
-          <td>{{row[k]}}</td>
+          <td>{{v or 'N/A'}}</td>
           {% endif %}
           {% endfor %}
           <td><a href="{{url_for('company.edit', id=row.get('id'))}}" class="btn btn-secondary btn-sm">Edit</a>

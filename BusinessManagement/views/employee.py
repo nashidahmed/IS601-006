@@ -9,7 +9,7 @@ def search():
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
-    query = """SELECT e.id, first_name, last_name, email, company_id, name
+    query = """SELECT e.id, first_name, last_name, email, IFNULL(company_id, 'N/A') as company_id, IFNULL(name, 'N/A') as company_name
     FROM IS601_MP3_Employees as e
     LEFT JOIN IS601_MP3_Companies as c
     ON company_id = c.id
@@ -75,6 +75,7 @@ def search():
 @employee.route("/add", methods=["GET","POST"])
 def add():
     if request.method == "POST":
+        data = {}
         # TODO add-1 retrieve form data for first_name, last_name, company, email
         # TODO add-2 first_name is required (flash proper error message)
         # TODO add-3 last_name is required (flash proper error message)
@@ -82,22 +83,25 @@ def add():
         # TODO add-5 email is required (flash proper error message)
         # TODO add-5a verify email is in the correct format
         has_error = False # use this to control whether or not an insert occurs
-        fn = request.form.get('fn')
-        ln = request.form.get('ln')
-        email = request.form.get('email')
-        company = request.form.get('company', None)
+        data['first_name'] = request.form.get('first_name')
+        data['last_name'] = request.form.get('last_name')
+        data['email'] = request.form.get('email')
+        data['company'] = request.form.get('company') or None
 
-        if not fn or not ln or not email or not re.match(r"^\S+@\S+\.\S+$", email):
-            if not fn: flash('First name is required', 'danger')
-            if not ln: flash('Last name is required', 'danger')
-            flash('Email is required', 'danger') if not email else flash('Incorrect email address format', 'danger')
-            has_error = True
+        for k, v in data.items():
+            print(k,v)
+            if k != 'company' and not v:
+                flash(f"{k.replace('_', ' ').capitalize()} is required", 'danger')
+                has_error = True
+            elif k == 'email' and not re.match(r"^\S+@\S+\.\S+$", v):
+                flash('Incorrect email address format', 'danger')
+                has_error = True
             
         if not has_error:
             try:
                 result = DB.insertOne("""INSERT INTO IS601_MP3_Employees (first_name, last_name, company_id, email)
-                VALUES (%s, %s, %s, %s)"""
-                , fn, ln, company, email) # <-- TODO add-6 add query and add arguments
+                VALUES (%(first_name)s, %(last_name)s, %(company)s, %(email)s)"""
+                , data) # <-- TODO add-6 add query and add arguments
                 if result.status:
                     flash("Created Employee Record", "success")
             except Exception as e:
@@ -114,7 +118,7 @@ def edit():
         return redirect(url_for('employee.search'))
     else:
         if request.method == "POST":
-            
+            data = {'id': int(id)}
             # TODO edit-1 retrieve form data for first_name, last_name, company, email
             # TODO edit-2 first_name is required (flash proper error message)
             # TODO edit-3 last_name is required (flash proper error message)
@@ -122,25 +126,26 @@ def edit():
             # TODO edit-5 email is required (flash proper error message)
             # TODO edit-5a verify email is in the correct format
             has_error = False # use this to control whether or not an insert occurs
-            fn = request.form.get('fn')
-            ln = request.form.get('ln')
-            email = request.form.get('email')
-            company = request.form.get('company')
+            data['first_name'] = request.form.get('first_name')
+            data['last_name'] = request.form.get('last_name')
+            data['email'] = request.form.get('email')
+            data['company'] = request.form.get('company') or None
 
-            if not fn or not ln or not email or not re.match(r"^\S+@\S+\.\S+$", email):
-                if not fn: flash('First name is required', 'danger')
-                if not ln: flash('Last name is required', 'danger')
-                flash('Email is required', 'danger') if not email else flash('Incorrect email address format', 'danger')
-                has_error = True
-            
+            for k, v in data.items():
+                if k != 'company' and not v:
+                    flash(f"{k.replace('_', ' ').capitalize()} is required", 'danger')
+                    has_error = True
+                elif k == 'email' and not re.match(r"^\S+@\S+\.\S+$", v):
+                    flash('Incorrect email address format', 'danger')
+                    has_error = True
                 
             if not has_error:
                 try:
                     # TODO edit-6 fill in proper update query
                     result = DB.update("""UPDATE IS601_MP3_Employees
-                    SET first_name = %s, last_name = %s, email = %s, company_id = %s
-                    WHERE id = %s"""
-                    , fn, ln, email, company or None, int(id))
+                    SET first_name = %(first_name)s, last_name = %(last_name)s, email = %(email)s, company_id = %(company)s
+                    WHERE id = %(id)s"""
+                    , data)
                     if result.status:
                         flash("Updated record", "success")
                 except Exception as e:

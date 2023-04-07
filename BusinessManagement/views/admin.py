@@ -52,7 +52,7 @@ def importCSV():
                 print(row) #example
                 # TODO importcsv-3 extract company data and append to company list 
                 # as a dict only with company data if all is present
-                try:
+                if row['company_name'] and row['address'] and row['city'] and row['country'] and row['state'] and row['zip'] and row['web']:
                     companies.append({
                       'name': row['company_name'],
                       'address': row['address'],
@@ -62,21 +62,15 @@ def importCSV():
                       'zip': row['zip'],
                       'website': row['web'],
                     })
-                except KeyError:
-                    flash('Company data missing', "danger")
-                    return redirect(request.url)
                 # TODO importcsv-4 extract employee data and append to employee list 
                 # as a dict only with employee data if all is present
-                try:
+                if row['first_name'] and row['last_name'] and row['email'] and row['company_name']:
                     employees.append({
                       'first_name': row['first_name'],
                       'last_name': row['last_name'],
                       'email': row['email'],
                       'company_name': row['company_name'],
                     })
-                except KeyError:
-                    flash('Employee data missing', "danger")
-                    return redirect(request.url)
                
                
             if len(companies) > 0:
@@ -84,7 +78,7 @@ def importCSV():
                 try:
                     result = DB.insertMany(company_query, companies)
                     # TODO importcsv-5 display flash message about number of companies inserted
-                    flash(f'{len(companies)} companies inserted')
+                    flash(f'{len(companies)} companies inserted', 'info')
                 except Exception as e:
                     traceback.print_exc()
                     flash("There was an error loading in the csv data", "danger")
@@ -96,7 +90,7 @@ def importCSV():
                 try:
                     result = DB.insertMany(employee_query, employees)
                     # TODO importcsv-7 display flash message about number of employees loaded
-                    flash(f'{len(employees)} employees inserted')
+                    flash(f'{len(employees)} employees inserted', 'info')
                 except Exception as e:
                     traceback.print_exc()
                     flash("There was an error loading in the csv data", "danger")

@@ -9,7 +9,7 @@ def search():
     # TODO search-1 retrieve id, name, address, city, country, state, zip, website, employee count as employees for the company
     # don't do SELECT *
     
-    query = """SELECT c.id, name, address, city, country, state, zip, website, count(e.id) as employees
+    query = """SELECT c.id, name, address, city, country, state, zip, IFNULL(website, 'N/A') as website, count(e.id) as employees
     FROM IS601_MP3_Companies as c
     LEFT JOIN IS601_MP3_Employees as e
     ON c.id = e.company_id
@@ -68,6 +68,7 @@ def search():
 @company.route("/add", methods=["GET","POST"])
 def add():
     if request.method == "POST":
+        data = {}
         # TODO add-1 retrieve form data for name, address, city, state, country, zip, website
         # TODO add-2 name is required (flash proper error message)
         # TODO add-3 address is required (flash proper error message)
@@ -83,38 +84,24 @@ def add():
         # note: call zip variable zipcode as zip is a built in function it could lead to issues
 
         has_error = False # use this to control whether or not an insert occurs
-        name = request.form.get('name')
-        address = request.form.get('address')
-        city = request.form.get('city')
-        state = request.form.get('state')
-        country = request.form.get('country')
-        website = request.form.get('website')
-        zipcode = request.form.get('zip')
+        data['name'] = request.form.get('name')
+        data['address'] = request.form.get('address')
+        data['city'] = request.form.get('city')
+        data['state'] = request.form.get('state')
+        data['country'] = request.form.get('country')
+        data['website'] = request.form.get('website') or None
+        data['zipcode'] = request.form.get('zip')
 
-        if not name:
-          flash('Name is required', 'danger')
-          has_error = True
-        if not address:
-          flash('Address is required', 'danger')
-          has_error = True
-        if not city:
-          flash('City is required', 'danger')
-          has_error = True
-        if not state:
-          flash('State is required', 'danger')
-          has_error = True
-        if not country:
-          flash('Country is required', 'danger')
-          has_error = True
-        if not zipcode:
-          flash('Zip is required', 'danger')
-          has_error = True
-          
+        for k, v in data.items():
+            if k != 'website' and not v:
+                flash(f"{k.capitalize() if k != 'zipcode' else 'Zip'} is required", 'danger')
+                has_error = True
+
         if not has_error:
             try:
                 result = DB.insertOne("""INSERT INTO IS601_MP3_Companies (name, address, city, state, country, website, zip)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-                , name, address, city, state, country, website, zipcode) # <-- TODO add-8 add query and add arguments
+                VALUES (%(name)s, %(address)s, %(city)s, %(state)s, %(country)s, %(website)s, %(zipcode)s)"""
+                , data) # <-- TODO add-8 add query and add arguments
                 if result.status:
                     flash("Added Company", "success")
             except Exception as e:
@@ -154,11 +141,11 @@ def edit():
             data['city'] = request.form.get('city')
             data['state'] = request.form.get('state')
             data['country'] = request.form.get('country')
-            data['website'] = request.form.get('website', None)
+            data['website'] = request.form.get('website') or None
             data['zipcode'] = request.form.get('zip')
 
             for k, v in data.items():
-                if not v:
+                if k != 'website' and not v:
                    flash(f"{k.capitalize() if k != 'zipcode' else 'Zip'} is required", 'danger')
                    has_error = True
             
