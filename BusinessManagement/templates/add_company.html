@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block title %}Add Company{% endblock %}
+{% block content %}
+{% from "country_state_selector.html" import country_state_selector %}
+
+<div class="container-fluid">
+  <div class="h1">Add Company</div>
+  <div>
+    <form method="POST">
+      {#
+      using regular html generate fields (labels and input) with proper types for
+      name (required)
+      address (required)
+      city (required) (can be a text field, doesn't need to be a valid city)
+      state/country (required) (given)
+      zip (required)
+      website (optional)
+      if a validation error occurs, the inserted form data should persist
+      #}
+      <!-- nn379 Apr 4 2023 -->
+      <label class="form-label" for="name">Name</label>
+      <input type="text" class="form-control mb-3" placeholder="name" name="name" value="{{company.name or ''}}" />
+
+      <label class="form-label" for="address">Address</label>
+      <input type="text" class="form-control mb-3" placeholder="Address" name="address"
+        value="{{company.address or ''}}" />
+
+      <label class="form-label" for="city">City</label>
+      <input type="text" class="form-control mb-3" placeholder="City" name="city" value="{{company.city or ''}}" />
+
+      <label class="form-label" for="website">Website</label>
+      <input type="text" class="form-control mb-3" placeholder="Website" name="website"
+        value="{{company.website or ''}}" />
+
+      <label class="form-label" for="zip">Zip</label>
+      <input type="text" class="form-control mb-3" placeholder="Zip" name="zip" value="{{company.zip or ''}}" />
+
+      {# use this for country/state selection #}
+      {{country_state_selector(country = company.country, state = company.state)}}
+      <input type="submit" class="btn btn-primary" value="Save Company" />
+    </form>
+  </div>
+</div>
+{% endblock %}
