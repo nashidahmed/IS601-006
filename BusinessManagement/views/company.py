@@ -130,6 +130,7 @@ def add():
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
+    # nn379 Apr 5 2023
     id = request.args.get('id')
     if not id: # TODO update this for TODO edit-1
         flash('Invalid Company ID', "danger")
@@ -161,11 +162,19 @@ def edit():
             data['website'] = request.form.get('website') or None
             data['zipcode'] = request.form.get('zip')
 
+            # Check if the required fields are all entered. If the data is a country or a state, check if it exists in pycountry for the selected country
             for k, v in data.items():
                 if k != 'website' and not v:
-                   flash(f"{k.capitalize() if k != 'zipcode' else 'Zip'} is required", 'danger')
-                   has_error = True
+                    flash(f"{k.capitalize() if k != 'zipcode' else 'Zip'} is required", 'danger')
+                    has_error = True
+                elif k == 'country' and v not in list(map(lambda c: c.alpha_2, pycountry.countries)):
+                    flash('Country does not exist', 'danger')
+                    has_error = True
+                elif k == 'state' and v not in list(map(lambda s: s.code.split("-")[1], pycountry.subdivisions.get(country_code=data['country'].strip()))):
+                    flash('State does not exist', 'danger')
+                    has_error = True
             
+            # If no error, we can proceed to update the company in the database. 
             if not has_error:
                 try:
                     # TODO edit-9 fill in proper update query
@@ -175,12 +184,11 @@ def edit():
                     WHERE id = %(id)s"""
                     , data)
                     if result.status:
-                        print("updated record")
                         flash("Updated record", "success")
                 except Exception as e:
                     # TODO edit-10 make this user-friendly
-                    print(f"{e}")
-                    flash('Update was not successful', "danger")
+                    print(str(e))
+                    flash('Company could not be updated', "danger")
         row = {}
         try:
             # TODO edit-11 fetch the updated data
@@ -190,6 +198,7 @@ def edit():
             , int(id))
             if result.status:
                 row = result.row
+            # DB does not throw exception if company does not exist in the db, so if no rows are returned, company was not found, return user to search screen.
             if row is None:
                 flash('Company ID does not exist', "danger")
                 return redirect(url_for('company.search'))
