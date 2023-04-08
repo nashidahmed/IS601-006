@@ -1,5 +1,5 @@
 # Your workflow name.
-name: Deploy to heroku prod.
+name: Deploy to heroku mp3 prod.
 
 # Run workflow on every push to master branch.
 
