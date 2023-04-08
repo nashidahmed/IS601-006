@@ -13,6 +13,7 @@
   limit (default 10)
   ensure all fields prefill with request arg data if provided
   #}
+  <!-- nn379 Apr 4 2023 -->
   <form method="GET">
     <div class="row">
       <div class="col">
@@ -21,8 +22,7 @@
           value="{{request.args.get('name') or ''}}" />
       </div>
       {{country_state_selector(layout="horizontal")}}
-      {{sort_filter(cols=[(allowed_columns[0], 'Name'), (allowed_columns[1], 'City'), (allowed_columns[2],
-      'Country'), (allowed_columns[3], 'State')])}}
+      {{sort_filter(cols=allowed_columns)}}
       <div class="col">
         <label class="visually-hidden" for="limit">Limit</label>
         <input type="text" class="form-control mb-3" placeholder="Limit" name="limit"
@@ -62,11 +62,13 @@
         {% for row in rows %}
         <tr>
           {% for k, v in row.items() %}
+          <!-- If website exists, display it as a link -->
           {% if k == 'website' and v %}
           <td>
             <a href="{{v}}" target="_blank">website</a>
           </td>
           {% else %}
+          <!-- Print N/A for the variable if it does not exist. This will occur for companies who do not have a website. -->
           <td>{{v or 'N/A'}}</td>
           {% endif %}
           {% endfor %}

@@ -18,6 +18,7 @@ def importCSV():
             flash('No selected file', "warning")
             return redirect(request.url)
         # TODO importcsv-1 check that it's a .csv file, return a proper flash message if it's not
+        # nn379 Apr 4 2023
         if not file.filename.endswith('.csv'):
             flash('Incorrect file format uploaded.', "danger")
             return redirect(request.url)
@@ -47,9 +48,10 @@ def importCSV():
             # Note: this reads the file as a stream instead of requiring us to save it
             stream = io.TextIOWrapper(file.stream._file, "UTF8", newline=None)
             # TODO importcsv-2 read the csv file stream as a dict
+            # nn379 Apr 4 2023
             data = csv.DictReader(stream)
             for row in data:
-                print(row) #example
+                # print(row) #example
                 # TODO importcsv-3 extract company data and append to company list 
                 # as a dict only with company data if all is present
                 if row['company_name'] and row['address'] and row['city'] and row['country'] and row['state'] and row['zip'] and row['web']:

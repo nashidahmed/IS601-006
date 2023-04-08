@@ -17,6 +17,8 @@
     ensure all fields prefill with request arg data if provided
     #}
 
+    <!-- nn379 Apr 5 2023 -->
+    <!-- Get fields from url, if they do not exist, then it is empty -->
     <div class="row">
       <div class="col">
         <label class="visually-hidden" for="fn">First name</label>
@@ -37,8 +39,7 @@
         <label class="visually-hidden" for="company">Company</label>
         {{company_dropdown(request.args.get("company"))}}
       </div>
-      {{sort_filter(cols=[(allowed_columns[0], 'First name'), (allowed_columns[1], 'Last name'), (allowed_columns[2],
-      'Email'), (allowed_columns[3], 'Company name')])}}
+      {{sort_filter(cols=allowed_columns)}}
       <div class="col">
         <label class="visually-hidden" for="limit">Limit</label>
         <input type="text" class="form-control mb-3" placeholder="Limit" name="limit"
@@ -73,6 +74,7 @@
       {% for row in rows %}
       <tr>
         {% for v in row.values() %}
+        <!-- Print N/A for the variable if it does not exist. This will occur for employees who do not have a company id or name -->
         <td>{{v or 'N/A'}}</td>
         {% endfor %}
         <td><a href="{{url_for('employee.edit', id=row.get('id'))}}" class="btn btn-secondary btn-sm">Edit</a>

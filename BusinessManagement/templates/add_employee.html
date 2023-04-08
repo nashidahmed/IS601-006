@@ -13,20 +13,20 @@
       email (required)
       if a validation error occurs, the inserted form data should persist
       #}
+      <!-- nn379 Apr 4 2023 -->
       <label class="form-label" for="fn">First name</label>
       <input type="text" class="form-control mb-3" placeholder="First name" name="first_name"
-        value="{{request.form.get('first_name', '')}}" />
+        value="{{employee.first_name or ''}}" />
 
       <label class="form-label" for="ln">Last name</label>
       <input type="text" class="form-control mb-3" placeholder="Last name" name="last_name"
-        value="{{request.form.get('last_name', '')}}" />
+        value="{{employee.last_name or ''}}" />
 
       <label class="form-label" for="email">Email</label>
-      <input type="text" class="form-control mb-3" placeholder="Email" name="email"
-        value="{{request.form.get('email', '')}}" />
+      <input type="text" class="form-control mb-3" placeholder="Email" name="email" value="{{employee.email or ''}}" />
 
       {# use the below for company selection #}
-      {{ company_dropdown(request.form.get('company') or '') }}
+      {{ company_dropdown(employee.company) }}
       <input type="submit" class="btn btn-primary" value="Save Employee" />
     </form>
   </div>

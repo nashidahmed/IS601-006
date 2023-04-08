@@ -1,5 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, flash, url_for
 from sql.db import DB
+import pycountry
 company = Blueprint('company', __name__, url_prefix='/company')
 
 @company.route("/search", methods=["GET"])
@@ -9,7 +10,8 @@ def search():
     # TODO search-1 retrieve id, name, address, city, country, state, zip, website, employee count as employees for the company
     # don't do SELECT *
     
-    query = """SELECT c.id, name, address, city, country, state, zip, IFNULL(website, 'N/A') as website, count(e.id) as employees
+    # nn379 Apr 4 2023
+    query = """SELECT c.id, name, address, city, country, state, zip, IFNULL(website, 'N/A') as website, IFNULL(count(e.id), '0') as employees
     FROM IS601_MP3_Companies as c
     LEFT JOIN IS601_MP3_Employees as e
     ON c.id = e.company_id
@@ -30,6 +32,7 @@ def search():
     order = request.args.get("order")
     limit = request.args.get("limit", 10) # TODO change this per the above requirements
 
+    # If any of the data has been entered append it to the end of the query and populate the args object. Add group by after appending all the conditions, this will be used to get the count of employees in that particular company
     if name:
       query += " AND name like %(name)s"
       args['name'] = f"%{name}%"
@@ -43,14 +46,20 @@ def search():
     if col and order:
         if col in allowed_columns and order in ["asc", "desc"]:
             query += f" ORDER BY {col} {order}"
-    if limit and int(limit) >= 1 and int(limit) <= 100:
-        query += " LIMIT %(limit)s"
-        args['limit'] = int(limit)
-    else:
-        flash('Limit out of bounds (Limit bound: 0 < Limit <= 100)', 'danger')
+
+    # Convert allowed_columns after the 'column' validation is complete so it can be passed to the templates for sort filter function
+    allowed_columns = list(map(lambda c: (c, c), allowed_columns))
+    # Check if limit that has been entered is a number and within 1 to 100, if not raise an exception informing the user through a flash message.
+    try:
+        if limit and int(limit) >= 1 and int(limit) <= 100:
+            query += " LIMIT %(limit)s"
+            args['limit'] = int(limit)
+        else:
+            raise Exception
+    except:
+        flash('Limit must be a number between 1 to 100', 'danger')
         return render_template("list_companies.html", rows=rows, allowed_columns=allowed_columns)
-    print("query",query)
-    print("args", args)
+
     try:
         result = DB.selectAll(query, args)
         #print(f"result {result.rows}")
@@ -58,17 +67,15 @@ def search():
             rows = result.rows
     except Exception as e:
         # TODO search-9 make message user friendly
-        flash(str(e), "danger")
-    # hint: use allowed_columns in template to generate sort dropdown
-    # hint2: convert allowed_columns into a list of tuples representing (value, label)
-    # do this prior to passing to render_template, but not before otherwise it can break validation
+        flash("Company could not be found.", "danger")
+        print(str(e))
     
     return render_template("list_companies.html", rows=rows, allowed_columns=allowed_columns)
 
 @company.route("/add", methods=["GET","POST"])
 def add():
+    data = {}
     if request.method == "POST":
-        data = {}
         # TODO add-1 retrieve form data for name, address, city, state, country, zip, website
         # TODO add-2 name is required (flash proper error message)
         # TODO add-3 address is required (flash proper error message)
@@ -82,21 +89,29 @@ def add():
         # TODO add-7 website is not required
         # TODO add-8 zipcode is required (flash proper error message)
         # note: call zip variable zipcode as zip is a built in function it could lead to issues
-
+        # nn379 Apr 5 2023
         has_error = False # use this to control whether or not an insert occurs
         data['name'] = request.form.get('name')
         data['address'] = request.form.get('address')
         data['city'] = request.form.get('city')
-        data['state'] = request.form.get('state')
         data['country'] = request.form.get('country')
+        data['state'] = request.form.get('state')
         data['website'] = request.form.get('website') or None
         data['zipcode'] = request.form.get('zip')
 
+        # Check if the required fields are all entered. If the data is a country or a state, check if it exists in pycountry for the selected country
         for k, v in data.items():
             if k != 'website' and not v:
                 flash(f"{k.capitalize() if k != 'zipcode' else 'Zip'} is required", 'danger')
                 has_error = True
+            elif k == 'country' and v not in list(map(lambda c: c.alpha_2, pycountry.countries)):
+                flash('Country does not exist', 'danger')
+                has_error = True
+            elif k == 'state' and v not in list(map(lambda s: s.code.split("-")[1], pycountry.subdivisions.get(country_code=data['country'].strip()))):
+                flash('State does not exist', 'danger')
+                has_error = True
 
+        # If no error, we can proceed to insert the company into the database. 
         if not has_error:
             try:
                 result = DB.insertOne("""INSERT INTO IS601_MP3_Companies (name, address, city, state, country, website, zip)
@@ -106,9 +121,11 @@ def add():
                     flash("Added Company", "success")
             except Exception as e:
                 # TODO add-9 make message user friendly
-                flash('Company was not inserted. Check your input.', "danger")
+                flash('Company could not be inserted. Check your input.', "danger")
+                print(str(e))
         
-    return render_template("add_company.html")
+    from types import SimpleNamespace
+    return render_template("add_company.html", company=SimpleNamespace(**data))
 
 @company.route("/edit", methods=["GET", "POST"])
 def edit():

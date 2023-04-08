@@ -9,6 +9,7 @@ def search():
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
+    # nn379 Apr 5 2023
     query = """SELECT e.id, first_name, last_name, email, IFNULL(company_id, 'N/A') as company_id, IFNULL(name, 'N/A') as company_name
     FROM IS601_MP3_Employees as e
     LEFT JOIN IS601_MP3_Companies as c
@@ -32,6 +33,7 @@ def search():
     order = request.args.get("order")
     limit = request.args.get("limit", 10) # TODO change this per the above requirements
 
+    # If any of the data has been entered append it to the end of the query and populate the args object.
     if fn:
       query += " AND first_name like %(first_name)s"
       args['first_name'] = f"%{fn}%"
@@ -48,46 +50,49 @@ def search():
         if col in allowed_columns and order in ["asc", "desc"]:
             query += f" ORDER BY {col} {order}"
 
-    if limit and int(limit) >= 1 and int(limit) <= 100:
-        # technically this should follow the same rules as col/order
-        # but it seems to work with the placeholder mapping with
-        # this connector
-        query += " LIMIT %(limit)s"
-        args['limit'] = int(limit)
-    else:
-        flash('Limit out of bounds (Limit bound: 0 < Limit <= 100)', 'danger')
+    # Convert allowed_columns after the 'column' validation is complete so it can be passed to the templates for sort filter function
+    allowed_columns = list(map(lambda c: (c, c.replace('_', ' ')), allowed_columns))
+    # Check if limit that has been entered is a number and within 1 to 100, if not raise an exception informing the user through a flash message.
+    try:
+        if limit and int(limit) >= 1 and int(limit) <= 100:
+            query += " LIMIT %(limit)s"
+            args['limit'] = int(limit)
+        else:
+            raise Exception
+    except:
+        flash('Limit must be a number between 1 to 100', 'danger')
         return render_template("list_employees.html", rows=rows, allowed_columns=allowed_columns)
-    print("query",query)
-    print("args", args)
+
     try:
         result = DB.selectAll(query, args)
         if result.status:
             rows = result.rows
     except Exception as e:
         # TODO search-10 make message user friendly
-        flash(e, "error")
-    # hint: use allowed_columns in template to generate sort dropdown
-    # hint2: convert allowed_columns into a list of tuples representing (value, label)
-    # do this prior to passing to render_template, but not before otherwise it can break validation
+        flash('Employee could not be found.', "danger")
+        print(str(e))
    
     return render_template("list_employees.html", rows=rows, allowed_columns=allowed_columns)
 
 @employee.route("/add", methods=["GET","POST"])
 def add():
+    data = {}
     if request.method == "POST":
-        data = {}
         # TODO add-1 retrieve form data for first_name, last_name, company, email
         # TODO add-2 first_name is required (flash proper error message)
         # TODO add-3 last_name is required (flash proper error message)
         # TODO add-4 company (may be None)
         # TODO add-5 email is required (flash proper error message)
         # TODO add-5a verify email is in the correct format
+        # nn379 Apr 4 2023
         has_error = False # use this to control whether or not an insert occurs
         data['first_name'] = request.form.get('first_name')
         data['last_name'] = request.form.get('last_name')
         data['email'] = request.form.get('email')
         data['company'] = request.form.get('company') or None
 
+        # Loop through all items in data and ensure first_name, last name and email are entered, flash error message if not since they are required.
+        # If the item in data is the email, ensure it is of a valid format using a regex. Set has_error to True if any of these conditions fail.
         for k, v in data.items():
             print(k,v)
             if k != 'company' and not v:
@@ -97,6 +102,7 @@ def add():
                 flash('Incorrect email address format', 'danger')
                 has_error = True
             
+        # If no error, we can proceed to insert the employee into the database. 
         if not has_error:
             try:
                 result = DB.insertOne("""INSERT INTO IS601_MP3_Employees (first_name, last_name, company_id, email)
@@ -106,12 +112,15 @@ def add():
                     flash("Created Employee Record", "success")
             except Exception as e:
                 # TODO add-7 make message user friendly
-                flash('Employee was not inserted. Check your input.', "danger")
-    return render_template("add_employee.html", request=request)
+                flash('Employee could not be inserted. Check your input', "danger")
+                print(str(e))
+    from types import SimpleNamespace
+    return render_template("add_employee.html", employee=SimpleNamespace(**data))
 
 @employee.route("/edit", methods=["GET", "POST"])
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
+    # nn379 Apr 4 2023
     id = request.args.get('id')
     if not id: # TODO update this for TODO edit-1
         flash('Invalid Employee ID', "danger")
@@ -131,6 +140,8 @@ def edit():
             data['email'] = request.form.get('email')
             data['company'] = request.form.get('company') or None
 
+            # Loop through all items in data and ensure names and email are entered, flash error message if not since they are required.
+            # If the item in data is the email, ensure it is of a valid format using a regex. Set has_error to True if any of these conditions fail.
             for k, v in data.items():
                 if k != 'company' and not v:
                     flash(f"{k.replace('_', ' ').capitalize()} is required", 'danger')
@@ -139,6 +150,7 @@ def edit():
                     flash('Incorrect email address format', 'danger')
                     has_error = True
                 
+            # If no error, we can proceed to update the employee in the database. 
             if not has_error:
                 try:
                     # TODO edit-6 fill in proper update query
@@ -151,7 +163,7 @@ def edit():
                 except Exception as e:
                     # TODO edit-7 make this user-friendly
                     print(str(e))
-                    flash('Employee was not updated', "danger")
+                    flash('Employee could not be updated', "danger")
         row = {}
         try:
             # TODO edit-8 fetch the updated data 
@@ -161,6 +173,7 @@ def edit():
             , int(id))
             if result.status:
                 row = result.row
+            # DB does not throw exception if employee does not exist in the db, so if no rows are returned, employee was not found, return user to search screen.
             if row is None:
                 flash('Employee ID does not exist', "danger")
                 return redirect(url_for('employee.search'))
