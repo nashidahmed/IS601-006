@@ -123,7 +123,7 @@ def edit():
     # nn379 Apr 4 2023
     id = request.args.get('id')
     if not id: # TODO update this for TODO edit-1
-        flash('Invalid Employee ID', "danger")
+        flash('Missing Employee ID', "danger")
         return redirect(url_for('employee.search'))
     else:
         if request.method == "POST":
@@ -192,11 +192,11 @@ def delete():
     # TODO delete-3 pass all argument except id to this route
     # TODO delete-4 ensure a flash message shows for successful delete
     # TODO delete-5 if id is missing, flash necessary message and redirect to search
+    # nn379 Apr 6 2023
     id = request.args.get('id')
     args = {**request.args}
-    print(args)
     if not id: # TODO update this for TODO edit-1
-        flash('Invalid Employee ID', "danger")
+        flash('Missing Employee ID', "danger")
     else:
         try:
             result = DB.delete("""DELETE FROM IS601_MP3_Employees
@@ -208,5 +208,5 @@ def delete():
             print(str(e))
             flash('Could not delete employee.', "danger")
 
-        del args['id']
+    del args['id']
     return redirect(url_for("employee.search", **args))

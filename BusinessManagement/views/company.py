@@ -133,7 +133,7 @@ def edit():
     # nn379 Apr 5 2023
     id = request.args.get('id')
     if not id: # TODO update this for TODO edit-1
-        flash('Invalid Company ID', "danger")
+        flash('Missing Company ID', "danger")
         return redirect(url_for('company.search'))
     else:
         if request.method == "POST":
@@ -217,33 +217,36 @@ def delete():
     # TODO delete-4 ensure a flash message shows for successful delete
     # TODO delete-5 for all employees assigned to this company set their company_id to None/null
     # TODO delete-6 if id is missing, flash necessary message and redirect to search
+    # nn379 Apr 6 2023
     id = request.args.get('id')
     args = {**request.args}
-    print(args)
     if not id: # TODO update this for TODO edit-1
-        flash('Invalid Company ID', "danger")
+        flash('Missing Company ID', "danger")
     else:
         try:
+            # Unallocate employees by setting the company_id of employees in this company to null
             result = DB.delete("""UPDATE IS601_MP3_Employees
             SET company_id = %s
             WHERE company_id = %s"""
             , None, int(id))
             if result.status:
                 print('Unallocated employees')
+        
+                # Only attempt to delete the company if the employees were unallocated successfully
+                try:
+                    result = DB.delete("""DELETE FROM IS601_MP3_Companies
+                    WHERE id = %s"""
+                    , int(id))
+                    if result.status:
+                        flash(f'Company id: {id}  deleted', "success")
+                except Exception as e:
+                    print(str(e))
+                    flash('Could not delete company.', "danger")
         except Exception as e:
             print(str(e))
             flash('Could not set employees\' company to null')
-        try:
-            result = DB.delete("""DELETE FROM IS601_MP3_Companies
-            WHERE id = %s"""
-            , int(id))
-            if result.status:
-                flash(f'Company id: {id}  deleted', "success")
-        except Exception as e:
-            print(str(e))
-            flash('Could not delete company.', "danger")
 
-        del args['id']
+    del args['id']
     return redirect(url_for('company.search', **args))
 
     
