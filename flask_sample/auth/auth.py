@@ -134,8 +134,10 @@ def profile():
                                 flash("Updated password", "success")
                         except Exception as ue:
                             flash(ue, "danger")
+                            is_valid = False
                     else:
                         flash("Invalid password","danger")
+                        is_valid = False
             except Exception as se:
                 flash(se, "danger")
         
