@@ -20,6 +20,9 @@ def page_not_found(e):
 def permission_denied(e):
     return render_template("403.html"), 403
 
+def unauthorized_access(e):
+    return render_template("401.html"), 401
+
 
 login_manager = flask_login.LoginManager()
 # app = Flask(__name__)
@@ -27,6 +30,7 @@ def create_app(config_filename=''):
     app = Flask(__name__)
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(403, permission_denied)
+    app.register_error_handler(401, unauthorized_access)
     app.secret_key = os.environ.get("SECRET_KEY", "missing_secret")
     login_manager.init_app(app)
     # app.config.from_pyfile(config_filename)
