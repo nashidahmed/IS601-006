@@ -1,0 +1,77 @@
+{% extends "layout.html" %} {% block title %}Cart{% endblock %}
+
+<!-- content -->
+{% block content %}
+<div class="container-fluid">
+  <div class="h2 text-center mt-3 mb-4">Cart</div>
+  {% if rows and rows|length > 0 %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set ns = namespace(total=0) %} {% for row in rows %}
+      <tr>
+        <td class="d-flex align-items-center">
+          <div class="cart-image">
+            {% if row.image %}
+            <img src="{{row.image}}" alt="{{row.name}}" />
+            {% else %}
+            <img src="/static/images/no-image.jpg" alt="no image available" />
+            {% endif %}
+          </div>
+          <h5>{{row.name}}</h5>
+        </td>
+        <td style="width: 15rem">
+          <form method="POST" action="{{url_for('cart.update')}}">
+            <div class="row">
+              <input type="hidden" name="product_id" value="{{row.product_id}}" />
+              <div class="col">
+                <input type="number" class="form-control" name="quantity" value="{{row.quantity}}" />
+              </div>
+              <div class="col d-grid">
+                <input type="submit" value="Update" class="btn btn-secondary btn-sm" />
+              </div>
+            </div>
+          </form>
+        </td>
+        <td>
+          {% set price = row.subtotal / 100 %}
+          <div class="mt-2 mb-3">${{'%.2f' % price|float}}</div>
+        </td>
+        <td>
+          <form method="POST" action="{{url_for('cart.delete')}}">
+            <input type="hidden" name="product_id" value="{{row.product_id}}" />
+            <input type="hidden" name="name" value="{{row.name}}" />
+            <input type="hidden" name="quantity" value="-1" />
+            <a href="{{url_for('shop.view', id=row.product_id)}}" class="btn btn-primary btn-sm">View</a>
+            <input type="submit" value="x" class="btn btn-danger btn-sm" />
+          </form>
+        </td>
+        {% set ns.total = ns.total + row.subtotal %}
+      </tr>
+      {% endfor %}
+      <tr>
+        <td class="text-end" colspan="100%">
+          {% set total = ns.total / 100 %} Total: ${{'%.2f' % total|float}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  {% else %}
+  <div class="text-center" colspan="100%">
+    <h5 class="mt-5">
+      No items in cart
+      <br />
+      <br />
+      <a href="{{url_for('shop.view_all')}}" class="btn btn-primary">View products</a>
+    </h5>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
