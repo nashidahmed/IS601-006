@@ -1,7 +1,7 @@
 # from https://towardsdatascience.com/deploy-to-google-cloud-run-using-github-actions-590ecf957af0
 import os
 import sys
-from flask import Flask, session, render_template, flash, redirect, url_for
+from flask import Flask, session, render_template, flash, redirect, url_for, request
 from dotenv import load_dotenv
 load_dotenv()
 import flask_login
@@ -38,6 +38,8 @@ def create_app(config_filename=''):
     with app.app_context():
         from admin.admin import admin
         app.register_blueprint(admin)
+        from roles.roles import roles
+        app.register_blueprint(roles)
         from views.shop import shop
         app.register_blueprint(shop)
         from cart.cart import cart

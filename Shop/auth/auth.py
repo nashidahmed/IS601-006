@@ -88,12 +88,6 @@ def login():
                 flash(str(e), "danger")
     return render_template("login.html", form=form)
 
-@auth.route("/landing-page", methods=["GET"])
-@login_required
-def landing_page():
-    
-    return render_template("landing_page.html")
-
 @auth.route("/logout", methods=["GET"])
 def logout():
     logout_user()
