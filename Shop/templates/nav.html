@@ -16,19 +16,12 @@
         {% if current_user.is_authenticated %}
         <!-- samples nav -->
         {% if current_user.has_role("Owner") %}
-        {% set products = [
-        ("admin.add", "Add"),
-        ("shop.view_all", "View"),
+        {% set owner = [
+        ("admin.add", "Add Product"),
+        ("admin.products", "View products")
         ] %}
-        {% call dropdown_nav(products)%}
-        Products
-        {% endcall %}
-        {% else %}
-        {% set products = [
-        ("shop.view_all", "View"),
-        ] %}
-        {% call dropdown_nav(products)%}
-        Products
+        {% call dropdown_nav(owner)%}
+        Owner
         {% endcall %}
         {% endif %}
         {% if current_user.has_role("Admin") %}

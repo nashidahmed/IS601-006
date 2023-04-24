@@ -59,7 +59,7 @@
               {% endif %}
               {% endif %}
             </div>
-            {% if current_user.has_role("Owner") %}
+            {% if current_user.is_authenticated and current_user.has_role("Owner") %}
             <div class="d-flex justify-content-between">
               <div class="edit-btn">
                 <a class="btn btn-primary btn-sm" href="{{url_for('shop.edit', id = r.id)}}">Edit</a>

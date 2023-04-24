@@ -35,6 +35,14 @@ li.nav-item {
   width: 100%;
 }
 
+.container-fluid.edit-product {
+  width: 50rem;
+}
+/* 
+.container-fluid.view-product {
+  width: 80rem;
+} */
+
 .brand-logo {
   height: 2rem;
   width: 2rem;
@@ -69,7 +77,7 @@ label {
 }
 
 .product-container {
-  width: 100rem;
+  width: 80rem;
 }
 
 .product-container .image {

@@ -54,20 +54,22 @@ def edit(id):
         name = form.name.data
         description = form.description.data
         stock = form.stock.data
-        cost = form.cost.data
+        cost = round((form.cost.data or 0) * 100)
         image = form.image.data
+        is_visible = 1 if form.is_visible.data else 0
         if name and description and stock and cost:
             try:
-                result = DB.insertOne("UPDATE IS601_Shop_Products SET name = %s, description = %s, stock = %s, cost = %s, image = %s WHERE id = %s", name, description, stock, cost, image, id)
+                result = DB.insertOne("UPDATE IS601_Shop_Products SET name = %s, description = %s, stock = %s, cost = %s, image = %s, is_visible = %s WHERE id = %s", name, description, stock, cost, image, is_visible, id)
                 if result.status:
                     flash("Updated product", "success")
             except Exception as e:
                 flash(f"Could not update product id: {id}", "danger")
     try:
-        resp = DB.selectOne("SELECT id, name, description, stock, cost, image from IS601_Shop_Products WHERE id = %s", id)
+        resp = DB.selectOne("SELECT id, name, description, stock, cost, image, is_visible from IS601_Shop_Products WHERE id = %s", id)
         if resp.status:
             row = resp.row
             form = EditProductForm(**row)
+            form.cost.data = form.cost.data / 100
     except Exception as e:
         flash(f"Could not get product id: {id}", "danger")
 

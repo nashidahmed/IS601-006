@@ -2,7 +2,7 @@
 {% block title %}{{resp.name or 'Product'}}{% endblock %}
 {% block content %}
 {% from "_formhelpers.html" import render_field %}
-<div class="container-fluid">
+<div class="container-fluid view-product">
   {% if resp and resp|length > 0 %}
   <div class="product-container d-flex mt-3 mx-auto">
     <div class="image p-2">
@@ -20,9 +20,9 @@
       <form class="mt-4" method="POST" action="{{url_for('cart.add')}}">
         {{ form.hidden_tag() }}
         {{render_field(form.quantity, placeholder='Enter quantity')}}
-        {{form.submit(class="btn btn-primary btn-sm")}}
+        {{form.submit(class="btn btn-primary")}}
       </form>
-      {% if current_user.has_role("Owner") %}
+      {% if current_user.is_authenticated and current_user.has_role("Owner") %}
       <div class="d-flex justify-content-between mt-3">
         <div class="edit-btn">
           <a class="btn btn-primary" href="{{url_for('shop.edit', id = resp.id)}}">Edit</a>

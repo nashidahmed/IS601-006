@@ -8,20 +8,21 @@ admin = Blueprint('admin', __name__, url_prefix='/admin',template_folder='templa
 @admin.route('product/add', methods=['GET', 'POST'])
 @admin_owner_permission.require(http_exception=403)
 def add():
-    form = AddProductForm()
+    form = AddProductForm(is_visible = True)
     if form.validate_on_submit:
       name = form.name.data
       description = form.description.data
       stock = form.stock.data
-      cost = form.cost.data
+      cost = round((form.cost.data or 0) * 100)
       image = form.image.data
+      is_visible = 1 if form.is_visible.data else 0
       if name and description and stock and cost:
           try:
-              result = DB.insertOne("INSERT INTO IS601_Shop_Products (name, description, stock, cost, image) VALUES(%s, %s, %s, %s, %s)", name, description, stock, cost, image)
+              result = DB.insertOne("INSERT INTO IS601_Shop_Products (name, description, stock, cost, image, is_visible) VALUES(%s, %s, %s, %s, %s, %s)", name, description, stock, cost, image, is_visible)
               if result.status:
                   flash("Added product", "success")
           except Exception as e:
-              flash("Could not add product", "danger")
+              flash(str(e), "danger")
 
     return render_template("product.html", form=form)
 
