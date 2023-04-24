@@ -44,6 +44,8 @@ def create_app(config_filename=''):
         app.register_blueprint(shop)
         from cart.cart import cart
         app.register_blueprint(cart)
+        from categories.categories import categories
+        app.register_blueprint(categories)
         from auth.auth import auth
         app.register_blueprint(auth)
 

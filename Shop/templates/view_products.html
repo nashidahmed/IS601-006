@@ -7,22 +7,10 @@
   <div class="row">
     <div class="col-2">
       <form>
-        {{render_field(form.search, placeholder='Search Products')}}
-        {% set options = ["name", "cost"] %}
-        <label class="form-label" for="col">Sort by</label>
-        <select class="form-select mb-3" id="col" name="col" value="{{form.col.data}}">
-          <option value="">Pick attribute...</option>
-          {% for op in options %}
-          {# using an inline if to output the selected attribute if it matches the op #}
-          <option {{'selected' if form.col.data==op }} value="{{op}}">{{op|capitalize}}</option>
-          {% endfor %}
-        </select>
-        <label class="form-label" for="order">Order</label>
-        <select class="form-select" id="order" name="order" value="{{form.order}}">
-          <option value="">Choose...</option>
-          <option {{'selected' if form.order.data=="asc" }} value="asc">Ascending</option>
-          <option {{'selected' if form.order.data=="desc" }} value="desc">Descending</option>
-        </select>
+        {{ render_field(form.search, placeholder='Search Products') }}
+        {{ render_field(form.category) }}
+        {{ render_field(form.col) }}
+        {{ render_field(form.order) }}
         <button type="submit" class="btn btn-primary mt-2">Filter</button>
         <a href="?" class="btn btn-secondary mt-2">Reset</a>
       </form>

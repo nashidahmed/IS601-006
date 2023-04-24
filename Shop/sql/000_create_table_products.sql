@@ -3,6 +3,7 @@ CREATE TABLE
         id int AUTO_INCREMENT PRIMARY KEY,
         name varchar(30) UNIQUE,
         description text,
+        category_id int REFERENCES IS601_Shop_Categories(id)
         stock int DEFAULT 0,
         cost int DEFAULT 999999,
         image text,

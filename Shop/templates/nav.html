@@ -23,6 +23,13 @@
         {% call dropdown_nav(owner)%}
         Owner
         {% endcall %}
+        {% set category = [
+        ("categories.add", "Add"),
+        ("categories.view", "View")
+        ] %}
+        {% call dropdown_nav(category)%}
+        Category
+        {% endcall %}
         {% endif %}
         {% if current_user.has_role("Admin") %}
         {% set roles = [

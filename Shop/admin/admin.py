@@ -12,17 +12,28 @@ def add():
     if form.validate_on_submit:
       name = form.name.data
       description = form.description.data
+      category = form.category.data
       stock = form.stock.data
       cost = round((form.cost.data or 0) * 100)
       image = form.image.data
       is_visible = 1 if form.is_visible.data else 0
-      if name and description and stock and cost:
+      if name and description and category and stock and cost:
           try:
               result = DB.insertOne("INSERT INTO IS601_Shop_Products (name, description, stock, cost, image, is_visible) VALUES(%s, %s, %s, %s, %s, %s)", name, description, stock, cost, image, is_visible)
               if result.status:
                   flash("Added product", "success")
           except Exception as e:
               flash(str(e), "danger")
+      
+    categories = []
+    try:
+      result = DB.selectAll("SELECT id, name FROM IS601_Shop_Categories",)
+      if result.status and result.rows:
+          categories = [(category['id'], category['name']) for category in result.rows]
+          form.category.choices.extend(categories)
+    except Exception as e:
+      print(e)
+      flash(str(e), "danger")
 
     return render_template("product.html", form=form)
 
@@ -30,28 +41,41 @@ def add():
 @admin_owner_permission.require(http_exception=403)
 def products():
     search = request.args.get('search')
+    category = request.args.get('category')
     col = request.args.get('col')
     order = request.args.get('order')
-    form = SearchForm(search = search, col = col, order = order)
+    form = SearchForm(search = search, category = category, col = col, order = order)
     args = []
     query = "SELECT id, name, description, stock, cost, image, is_visible from IS601_Shop_Products WHERE 1=1"
     if search:
         query += " AND name like %s"
         args.append(f"%{search}%")
+    if category:
+        query += " AND category_id = %s"
+        args.append(f"{category}")
     if col and order:
         if col in ["name","cost"] \
             and order in ["asc", "desc"]:
             query += f" ORDER BY {col} {order}"
     rows = []
+    categories = []
     try:
         print(query)
         resp = DB.selectAll(query, *args)
         if resp.status:
             rows = resp.rows
     except Exception as e:
-        # TODO make this user-friendly
-        flash(str(e), "danger")
+        flash("Unable to retieve products", "danger")
     
+    try:
+        result = DB.selectAll("SELECT id, name FROM IS601_Shop_Categories",)
+        if result.status and result.rows:
+            categories = [(category['id'], category['name']) for category in result.rows]
+            form.category.choices.extend(categories)
+    except Exception as e:
+        print(e)
+        flash("Error getting categories", "danger")
+
     return render_template("view_products.html", resp=rows, form=form, is_admin = True)
 
 @admin.route('/set/visibility/<is_visible>/<product_id>/<name>', methods=['GET'])

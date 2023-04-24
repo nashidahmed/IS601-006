@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}
 {% if not is_edit %}
-Add Product
+Add Category
 {% else %}
-Edit Product
+Edit Category
 {% endif %}
 {% endblock %}
 {% block content %}
@@ -20,16 +20,6 @@ Edit Product
     <form method="POST">
       {{ form.hidden_tag() }}
       {{ render_field(form.name) }}
-      {{ render_field(form.description) }}
-      {{ render_field(form.category) }}
-      {{ render_field(form.stock) }}
-      {{ form.cost.label(class="form-label") }}
-      <div class="input-group mb-3">
-        <span class="input-group-text">$</span>
-        {{ form.cost(class="form-control")|safe }}
-      </div>
-      {{ render_field(form.image) }}
-      {{ render_field(form.is_visible) }}
       {{ form.submit(class="btn btn-primary") }}
     </form>
   </div>
