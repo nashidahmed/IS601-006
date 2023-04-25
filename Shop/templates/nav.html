@@ -1,0 +1,68 @@
+{% from "_dropdown_nav.html" import dropdown_nav %}
+<nav class="navbar navbar-expand-lg bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{url_for('shop.view_all')}}">
+      <img src="/static/images/logo.svg" class="brand-logo" />
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('shop.view_all')}}">Home</a>
+        </li>
+        {% if current_user.is_authenticated %}
+        <!-- samples nav -->
+        {% if current_user.has_role("Owner") %}
+        {% set owner = [
+        ("admin.add", "Add Product"),
+        ("admin.products", "View products")
+        ] %}
+        {% call dropdown_nav(owner)%}
+        Owner
+        {% endcall %}
+        {% set category = [
+        ("categories.add", "Add"),
+        ("categories.view", "View")
+        ] %}
+        {% call dropdown_nav(category)%}
+        Category
+        {% endcall %}
+        {% endif %}
+        {% if current_user.has_role("Admin") %}
+        {% set roles = [
+        ("roles.add", "Add"),
+        ("roles.list", "List"),
+        ("roles.assign", "Assign")
+        ] %}
+        {% call dropdown_nav(roles)%}
+        Roles
+        {% endcall %}
+        {% endif %}
+        {% endif %}
+      </ul>
+      {% set user_links = [
+      ('', current_user.username),
+      ("auth.profile", "View Profile"),
+      ("cart.view", "View Cart"),
+      ("auth.logout", "Logout"),
+      ] %}
+      {% if not current_user.is_authenticated %}
+      <ul class="navbar-nav mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('auth.login')}}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('auth.register')}}">Register</a>
+        </li>
+      </ul>
+      {% else %}
+      {% call dropdown_nav(user_links, True)%}
+      <img src="/static/images/user-circle.svg" height="40" width="40" />
+      {% endcall %}
+      {% endif %}
+    </div>
+  </div>
+</nav>

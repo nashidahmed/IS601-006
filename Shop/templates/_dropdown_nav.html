@@ -1,0 +1,26 @@
+{% macro dropdown_nav(links, is_icon) %}
+
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" style="cursor: pointer" href="#" role="button" data-bs-toggle="dropdown"
+    aria-expanded="false">
+    {{caller()}}
+  </a>
+  <!-- Check if an icon is passed to display for the dropdown -->
+  {% if is_icon %}
+  <ul class="dropdown-menu" style="left: unset; right: 0">
+    {% for url, text in links %} {% if not url %}
+    <!-- Insert the email for the profile dropdown on the top right -->
+    <li><span class="profile-username">{{text}}</span></li>
+    {% else %}
+    <li><a class="dropdown-item" href="{{url_for(url)}}">{{text}}</a></li>
+    {% endif %} {% endfor %}
+  </ul>
+  {% else %}
+  <ul class="dropdown-menu">
+    {% for url, text in links %}
+    <li><a class="dropdown-item" href="{{url_for(url)}}">{{text}}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</li>
+{% endmacro %}

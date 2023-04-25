@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}{{resp.name or 'Product'}}{% endblock %}
+{% block content %}
+{% from "_formhelpers.html" import render_field %}
+<div class="container-fluid view-product">
+  {% if resp and resp|length > 0 %}
+  <div class="product-container d-flex mt-3 mx-auto">
+    <div class="image p-2">
+      {% if resp.image %}
+      <img src="{{resp.image}}" class="product-image" alt="{{resp.name}}">
+      {% else %}
+      <img src="/static/images/no-image.jpg" class="product-image" alt="no image available">
+      {% endif %}
+    </div>
+    <div class="product-details ms-5">
+      <div class="h3 mt-3 mb-4">{{resp.name}}</div>
+      {% set price = resp.cost / 100 %}
+      <div class="mt-2 mb-3">Price: ${{'%.2f' % price|float}}</div>
+      <div>{{resp.description}}</div>
+      <form class="mt-4" method="POST" action="{{url_for('cart.add')}}">
+        {{ form.hidden_tag() }}
+        {{render_field(form.quantity, placeholder='Enter quantity')}}
+        {{form.submit(class="btn btn-primary")}}
+      </form>
+      {% if current_user.is_authenticated and current_user.has_role("Owner") %}
+      <div class="d-flex justify-content-between mt-3">
+        <div class="edit-btn">
+          <a class="btn btn-primary" href="{{url_for('shop.edit', id = resp.id)}}">Edit</a>
+        </div>
+        {# <div class="delete">
+          <button class="btn btn-danger">Delete</button>
+        </div> #}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% else %}
+  <h4 class="text-center mt-5">Product unavailable</h4>
+  {% endif %}
+</div>
+{% endblock %}
