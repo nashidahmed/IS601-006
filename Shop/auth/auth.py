@@ -85,7 +85,7 @@ def login():
                     flash("Invalid user", "warning")
 
             except Exception as e:
-                flash(str(e), "danger")
+                flash("Could not login", "danger")
     return render_template("login.html", form=form)
 
 @auth.route("/logout", methods=["GET"])

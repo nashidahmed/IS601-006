@@ -105,7 +105,7 @@ def assign():
             if result.status and result.rows:
                 users = result.rows
         except Exception as e:
-            flash(str(e), "danger")
+            flash("Could not assign role", "danger")
     result = DB.selectAll("SELECT id, name FROM IS601_Roles WHERE is_active = 1",)
     if result.status and result.rows:
         roles = result.rows
@@ -131,7 +131,7 @@ def apply():
                 if result.status:
                     flash(f"Successfully enabled/disabled roles for the user/role {len(mappings)} mappings", "success")
             except Exception as e:
-                flash(str(e), "danger")
+                flash("Could not enable/disable roles for the user/role", "danger")
         else:
             flash("No user/role mappings", "danger")
 

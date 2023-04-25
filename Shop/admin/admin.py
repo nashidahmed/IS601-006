@@ -23,7 +23,11 @@ def add():
               if result.status:
                   flash("Added product", "success")
           except Exception as e:
-              flash(str(e), "danger")
+              print(e.args[0])
+              if '1062' in str(e):
+                  flash('Duplicate data. Product name may already exist', 'danger')
+              else:
+                  flash("Unable to add product", "danger")
       
     categories = []
     try:
@@ -33,7 +37,7 @@ def add():
           form.category.choices.extend(categories)
     except Exception as e:
       print(e)
-      flash(str(e), "danger")
+      flash("Unable to get categories", "danger")
 
     return render_template("product.html", form=form)
 

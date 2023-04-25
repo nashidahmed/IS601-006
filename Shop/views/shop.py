@@ -81,7 +81,10 @@ def edit(id):
                 if result.status:
                     flash("Updated product", "success")
             except Exception as e:
-                flash(f"Could not update product id: {id}", "danger")
+                if '1062' in str(e):
+                    flash('Duplicate data. Product name may already exist', 'danger')
+                else:
+                    flash(f"Could not update product id: {id}", "danger")
     try:
         resp = DB.selectOne("SELECT id, name, description, category_id as category, stock, cost, image, is_visible from IS601_Shop_Products WHERE id = %s", id)
         if resp.status:
@@ -99,6 +102,6 @@ def edit(id):
           form.category.choices.extend(categories)
     except Exception as e:
       print(e)
-      flash(str(e), "danger")
+      flash("Could not get categories", "danger")
 
     return render_template("product.html", form=form, is_edit = True)
