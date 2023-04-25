@@ -2,8 +2,8 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 {% from "_formhelpers.html" import render_field %}
-<div class="container-fluid">
-  <div class="h3">Login</div>
+<div class="container-fluid small">
+  <div class="h3 text-center my-5">Login</div>
   <form method="POST">
     {{ form.hidden_tag() }}
     {{render_field(form.email)}}

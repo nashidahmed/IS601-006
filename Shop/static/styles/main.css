@@ -38,10 +38,10 @@ li.nav-item {
 .container-fluid.small {
   width: 50rem;
 }
-/* 
-.container-fluid.view-product {
-  width: 80rem;
-} */
+
+.container-fluid.medium {
+  width: 75rem;
+}
 
 .brand-logo {
   height: 2rem;

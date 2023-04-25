@@ -6,6 +6,7 @@ from products.forms import AddProductForm, EditProductForm, SearchForm
 from admin.permissions import admin_owner_permission
 shop = Blueprint('shop', __name__, url_prefix='/')
 
+# nn379 Apr 24 2023
 @shop.route('/', methods=['GET'])
 def view_all():
     search = request.args.get('search')
@@ -15,6 +16,8 @@ def view_all():
     form = SearchForm(search = search, category = category, col = col, order = order)
     args = []
     query = "SELECT id, name, description, stock, cost, image from IS601_Shop_Products WHERE is_visible=1"
+    # Do the filering here by appending the search values to the query.
+    # Search and category are done by using where clauses while col and order are used for the sorting logic
     if search:
         query += " AND name like %s"
         args.append(f"%{search}%")

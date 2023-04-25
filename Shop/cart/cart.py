@@ -100,3 +100,17 @@ def delete():
         flash("Error deleting item from cart", "danger")
 
     return redirect(url_for('cart.view'))
+
+@cart.route('/clear', methods=['POST'])
+@login_required
+def clear():
+    user_id = current_user.get_id()
+    try:
+        result = DB.delete("DELETE FROM IS601_Shop_Cart where user_id = %s", user_id)
+        if result.status:
+            flash("Cleared cart", "success")
+    except Exception as e:
+        print("Error clearing cart", e)
+        flash("Error clearing cart", "danger")
+
+    return redirect(url_for('cart.view'))

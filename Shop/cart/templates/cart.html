@@ -2,9 +2,12 @@
 
 <!-- content -->
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid medium">
   <div class="h2 text-center mt-3 mb-4">Cart</div>
   {% if rows and rows|length > 0 %}
+  <form method="POST" class="text-end my-3" action="{{url_for('cart.clear')}}">
+    <input type="submit" class="btn btn-primary" value="Clear cart" />
+  </form>
   <table class="table">
     <thead>
       <tr>
@@ -25,7 +28,7 @@
             <img src="/static/images/no-image.jpg" alt="no image available" />
             {% endif %}
           </div>
-          <h5>{{row.name}}</h5>
+          <h5 class="ms-3">{{row.name}}</h5>
         </td>
         <td style="width: 15rem">
           <form method="POST" action="{{url_for('cart.update')}}">
