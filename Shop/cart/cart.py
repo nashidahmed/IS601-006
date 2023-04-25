@@ -65,7 +65,6 @@ def update():
     if quantity > 0:
         try:
             result = DB.selectOne("SELECT cost,name from IS601_Shop_Products WHERE id = %s", product_id)
-            print("result", result)
             if result.status and result.row:
                 cost = result.row["cost"]
                 name = result.row["name"]
@@ -80,6 +79,8 @@ def update():
         except Exception as e:
             print("Error updating cart" ,e)
             flash("Error updating cart", "danger")
+    elif quantity == 0:
+        flash('Quantity cannot be 0, if you want to remove the product, use the delete button', 'danger')
     else:
         flash('Quantity must be more than 0', 'danger')
 
