@@ -10,6 +10,7 @@ orders = Blueprint('orders', __name__, url_prefix='/orders',template_folder='tem
 def view():
     form = PaymentForm()
     rows = []
+    can_refresh = False
     try:
         result = DB.selectAll("""SELECT c.id, product_id, name, c.quantity, c.cost as cart_cost, p.cost as product_cost, (c.quantity * c.cost) as cart_subtotal, (c.quantity * p.cost) as actual_subtotal, image 
         FROM IS601_Shop_Cart c JOIN IS601_Shop_Products p on c.product_id = p.id
@@ -17,10 +18,17 @@ def view():
         """, current_user.get_id())
         if result and result.rows:
             rows = result.rows
+            for product in rows:
+                if product["cart_cost"] != product["product_cost"]:
+                    can_refresh = True
     except Exception as e:
         print("Error getting cart", e)
         flash("Error fetching cart", "danger")
-    return render_template("checkout.html", rows=rows, form=form)
+
+    if can_refresh:
+        flash("The price for some items in your cart have changed, please refresh cart", "warning")
+    
+    return render_template("checkout.html", rows=rows, form=form, can_refresh=can_refresh)
     
 @orders.route("/checkout", methods=["POST"])
 @login_required

@@ -5,8 +5,11 @@
 {% block content %}
 <div class="container-fluid large">
   <div class="h2 text-center mt-3 mb-4">Checkout</div>
-  <div class="my-3">
+  <div class="my-3 d-flex justify-content-between">
     <a href="{{ url_for('cart.view') }}" class="btn btn-secondary">Back to cart</a>
+    {% if can_refresh %}
+    <a href="{{url_for('cart.refresh', is_cart=0)}}" class="btn btn-primary">Refresh cart</a>
+    {% endif %}
   </div>
   <div class="row">
     <div class="col">
