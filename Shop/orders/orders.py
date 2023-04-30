@@ -2,7 +2,6 @@ import traceback
 from flask import Blueprint, flash, render_template, request, redirect, url_for
 from sql.db import DB
 from orders.forms import PaymentForm
-from werkzeug.datastructures import MultiDict
 from flask_login import login_required, current_user
 orders = Blueprint('orders', __name__, url_prefix='/orders',template_folder='templates')
 
@@ -42,7 +41,7 @@ def pay():
             DB.getDB().autocommit = False
 
             # Fetch cart data
-            result = DB.selectAll("""SELECT c.id, product_id, name, c.quantity, p.stock, c.cost as cart_cost, p.cost as product_cost, (c.quantity * c.cost) as cart_subtotal, (c.quantity * p.cost) as actual_subtotal 
+            result = DB.selectAll("""SELECT c.id, product_id, name, quantity, stock, c.cost as cart_cost, p.cost as product_cost, (c.quantity * c.cost) as cart_subtotal, (c.quantity * p.cost) as actual_subtotal 
             FROM IS601_Shop_Cart c JOIN IS601_Shop_Products p on c.product_id = p.id
             WHERE c.user_id = %s
             """, current_user.get_id())
@@ -53,12 +52,12 @@ def pay():
             has_error = False
             for product in cart:
                 if product["quantity"] > product["stock"]:
-                    flash(f"Product {product['name']} doesn't have enough stock left", "warning")
+                    flash(f"There are only {product['stock']} of product {product['name']} left in stock", "warning")
                     has_error = True
                 if product["cart_cost"] != product["product_cost"]:
                     flash(f"Product {product['name']}'s price has changed, please refresh cart", "warning")
                     has_error = True
-                total += int(product["subtotal"] or 0)
+                total += int(product["cart_subtotal"] or 0)
                 quantity += int(product["quantity"])
 
             # Check if user has entered the right amount
@@ -126,3 +125,52 @@ def pay():
     # TODO route to thank you / summary page
     # TODO add link from cart page to this route
     return render_template("checkout.html", rows=cart, order=order, form=form)
+
+@orders.route("/<id>", methods=["GET"])
+@login_required
+def order(id):
+    rows = []
+    total = 0
+    print(id)
+    if not id:
+        flash("Invalid order", "danger")
+        return redirect(url_for("orders.history"))
+    try:
+        # locking query to order_id and user_id so the user can see only their orders
+        result = DB.selectAll("""
+        SELECT name, o.cost as cost, quantity, (o.cost * quantity) as subtotal
+        FROM IS601_Shop_OrderProducts o
+        JOIN IS601_Shop_Products p on o.product_id = p.id
+        WHERE order_id = %s AND user_id = %s 
+        """, id, current_user.get_id())
+        if result.status and result.rows:
+            rows = result.rows
+            total = sum(int(row["subtotal"]) for row in rows)
+
+        result = DB.selectOne("""
+        SELECT id, number_of_products, address, payment_method, money_received, first_name, last_name, created FROM IS601_Shop_Orders WHERE id = %s AND user_id = %s
+        """, id, current_user.get_id())
+        if result.status and result.row:
+            order = result.row
+        
+    except Exception as e:
+        print("Error getting order", e)
+        flash(str(e), "danger")
+        flash("Error fetching order", "danger")
+    return render_template("order.html", rows=rows, order=order, total=total)
+
+@orders.route("/history", methods=["GET"])
+@login_required
+def history():
+    rows = []
+    try:
+        result = DB.selectAll("""
+        SELECT id as order_id, number_of_products, address, payment_method, money_received, first_name, last_name FROM IS601_Shop_Orders WHERE user_id = %s
+        """, current_user.get_id())
+        if result.status and result.rows:
+            rows = result.rows
+    except Exception as e:
+        print("Error getting orders", e)
+        flash(str(e), "danger")
+        flash("Error fetching orders", "danger")
+    return render_template("history.html", rows=rows)

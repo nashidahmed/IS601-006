@@ -1,0 +1,41 @@
+<script type="text/javascript" charset="utf-8">
+  get_order = (e) => {
+    let id = e.getElementsByTagName("td")[0].innerText
+    console.log(id)
+
+    window.location.href = `${window.origin}/orders/${id}`
+  }
+</script>
+
+{% extends "layout.html" %}
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+<div class="container large">
+  <div class="h2 text-center mt-3 mb-4">Order History</div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Name</th>
+        <th>Number of products</th>
+        <th>Address</th>
+        <th>Payment method</th>
+        <th>Amount paid</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr class="cursor-pointer" onclick="get_order(this)">
+        <td>{{row.order_id}}</td>
+        <td>{{row.first_name + ' ' + row.last_name}}</td>
+        <td>{{row.number_of_products}}</td>
+        <td class="white-space-pre-wrap">{{row.address}}</td>
+        <td>{{row.payment_method.split('_')|map('capitalize')|join(' ')}}</td>
+        <td>${{'%.2f' % (row.money_received / 100)|float}}</td>
+        {% endfor %}
+    </tbody>
+    </tr>
+  </table>
+</div>
+{% endblock %}

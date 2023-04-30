@@ -109,3 +109,11 @@ label {
   text-decoration: line-through;
   color: gray;
 }
+
+.white-space-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
