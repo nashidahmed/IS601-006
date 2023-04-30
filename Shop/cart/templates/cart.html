@@ -11,14 +11,15 @@
   <table class="table">
     <thead>
       <tr>
-        <th>Item</th>
+        <th>Product</th>
+        <th>Unit price</th>
         <th>Quantity</th>
         <th>Subtotal</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      {% set ns = namespace(total=0) %} {% for row in rows %}
+      {% set ns = namespace(cart_total=0, actual_total=0) %} {% for row in rows %}
       <tr>
         <td class="d-flex align-items-center">
           <div class="cart-image">
@@ -29,6 +30,18 @@
             {% endif %}
           </div>
           <h5 class="ms-3">{{row.name}}</h5>
+        </td>
+        <td>
+          {% if row.product_cost != row.cart_cost %}
+          ${{'%.2f' % (row.product_cost / 100)|float}}
+          ({% if row.product_cost - row.cart_cost > 0 %}+{% else %}-{% endif %}
+          {{ '%.2f' % ((row.product_cost - row.cart_cost) / row.cart_cost * 100) | float |abs }}%)
+          <div class="strikethrough">
+            ${{'%.2f' % (row.cart_cost / 100)|float}}
+          </div>
+          {% else %}
+          ${{'%.2f' % (row.product_cost / 100)|float}}
+          {% endif %}
         </td>
         <td style="width: 15rem">
           <form method="POST" action="{{url_for('cart.update')}}">
@@ -44,8 +57,18 @@
           </form>
         </td>
         <td>
-          {% set price = row.subtotal / 100 %}
-          <div class="mt-2 mb-3">${{'%.2f' % price|float}}</div>
+          {% if row.cart_subtotal != row.actual_subtotal %}
+          {% set actual_price = row.actual_subtotal / 100 %}
+          ${{'%.2f' % actual_price|float}}
+          ({% if row.actual_subtotal - row.cart_subtotal > 0 %}+{% else %}-{% endif %}
+          {{ '%.2f' % ((row.actual_subtotal - row.cart_subtotal) / row.cart_subtotal * 100) | float |abs }}%)
+          <div class="strikethrough">
+            ${{'%.2f' % (row.cart_subtotal / 100)|float}}
+          </div>
+          {% else %}
+          {% set price = row.cart_subtotal / 100 %}
+          ${{'%.2f' % price|float}}
+          {% endif %}
         </td>
         <td>
           <form method="POST" action="{{url_for('cart.delete')}}">
@@ -56,16 +79,33 @@
             <input type="submit" value="x" class="btn btn-danger btn-sm" />
           </form>
         </td>
-        {% set ns.total = ns.total + row.subtotal %}
+        {% set ns.cart_total = ns.cart_total + row.cart_subtotal %}
+        {% set ns.actual_total = ns.actual_total + row.actual_subtotal %}
       </tr>
       {% endfor %}
       <tr>
-        <td class="text-end" colspan="100%">
-          {% set total = ns.total / 100 %} Total: ${{'%.2f' % total|float}}
+        <td></td>
+        <td colspan="2" class="text-end fw-bold">Total: </td>
+        <td colspan="2">
+          {% if ns.cart_total != ns.actual_total %}
+          {% set actual_price = ns.actual_total / 100 %}
+          ${{'%.2f' % actual_price|float}}
+          ({% if ns.actual_total - ns.cart_total > 0 %}+{% else %}-{% endif %}
+          {{ '%.2f' % ((ns.actual_total - ns.cart_total) / ns.cart_total * 100) | float |abs }}%)
+          <div class="strikethrough">
+            ${{'%.2f' % (ns.cart_total / 100)|float}}
+          </div>
+          {% else %}
+          {% set price = ns.cart_total / 100 %}
+          ${{'%.2f' % price|float}}
+          {% endif %}
         </td>
       </tr>
     </tbody>
   </table>
+  <div class="text-center">
+    <a href="{{url_for('orders.view')}}" class="btn btn-primary">Checkout</a>
+  </div>
   {% else %}
   <div class="text-center" colspan="100%">
     <h5 class="mt-5">
