@@ -16,7 +16,6 @@ def add():
         user_id = current_user.get_id()
         try:
             result = DB.selectOne("SELECT cost,name from IS601_Shop_Products WHERE id = %s", product_id)
-            print("result", result)
             if result.status and result.row:
                 cost = result.row["cost"]
                 name = result.row["name"]
@@ -45,7 +44,7 @@ def add():
 def view():
     rows = []
     try:
-        result = DB.selectAll("""SELECT c.id, product_id, name, c.quantity, (c.quantity * c.cost) as subtotal, image 
+        result = DB.selectAll("""SELECT c.id, product_id, name, c.quantity, c.cost as cart_cost, p.cost as product_cost, (c.quantity * c.cost) as cart_subtotal, (c.quantity * p.cost) as actual_subtotal, image 
         FROM IS601_Shop_Cart c JOIN IS601_Shop_Products p on c.product_id = p.id
         WHERE c.user_id = %s
         """, current_user.get_id())

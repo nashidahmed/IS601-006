@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+{% block title %}Checkout{% endblock %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+<div class="container-fluid large">
+  <div class="h2 text-center mt-3 mb-4">Checkout</div>
+  <div class="my-3">
+    <a href="{{ url_for('cart.view') }}" class="btn btn-secondary">Back to cart</a>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="h4 text-center mt-3 mb-4">Payment Information</div>
+      <form method="POST">
+        <div class="row">
+          <div class="col">
+            {{ render_field(form.first_name, placeholder="Enter your first name") }}
+          </div>
+          <div class="col">
+            {{ render_field(form.last_name, placeholder="Enter your last name") }}
+          </div>
+        </div>
+        {{ render_field(form.address, placeholder="Enter your address", rows="7") }}
+        {{ render_field(form.method) }}
+        <div class="input-group mb-3">
+          <span class="input-group-text">$</span>
+          {{ form.amount(class="form-control", placeholder="Enter the amount")|safe }}
+        </div>
+        <div class="text-center mt-5">
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+    <div class="col-5">
+      <table class="table card d-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set ns = namespace(cart_total=0, actual_total=0) %} {% for row in rows %}
+          <tr>
+            <td>
+              <div class="ms-2">
+                {{row.name}} x {{row.quantity}}
+              </div>
+            </td>
+            <td>
+              <form method="POST" action="{{url_for('cart.update')}}">
+                <div class="row">
+                  <input type="hidden" name="product_id" value="{{row.product_id}}" />
+                  <div class="col">
+                    {% if row.product_cost != row.cart_cost %}
+                    ${{'%.2f' % (row.product_cost / 100)|float}}
+                    ({% if row.product_cost - row.cart_cost > 0 %}+{% else %}-{% endif %}
+                    {{ '%.2f' % ((row.product_cost - row.cart_cost) / row.cart_cost * 100) | float |abs }}%)
+                    <div class="strikethrough">
+                      ${{'%.2f' % (row.cart_cost / 100)|float}}
+                    </div>
+                    {% else %}
+                    ${{'%.2f' % (row.product_cost / 100)|float}}
+                    {% endif %}
+                  </div>
+                </div>
+              </form>
+            </td>
+            <td>
+              {% if row.cart_subtotal != row.actual_subtotal %}
+              {% set actual_price = row.actual_subtotal / 100 %}
+              ${{'%.2f' % actual_price|float}}
+              ({% if row.actual_subtotal - row.cart_subtotal > 0 %}+{% else %}-{% endif %}
+              {{ '%.2f' % ((row.actual_subtotal - row.cart_subtotal) / row.cart_subtotal * 100) | float |abs }}%)
+              <div class="strikethrough">
+                ${{'%.2f' % (row.cart_subtotal / 100)|float}}
+              </div>
+              {% else %}
+              {% set price = row.cart_subtotal / 100 %}
+              ${{'%.2f' % price|float}}
+              {% endif %}
+            </td>
+            {% set ns.cart_total = ns.cart_total + row.cart_subtotal %}
+            {% set ns.actual_total = ns.actual_total + row.actual_subtotal %}
+          </tr>
+          {% endfor %}
+          <tr>
+            <td></td>
+            <td class="text-end fw-bold">Total: </td>
+            <td>
+              {% if ns.cart_total != ns.actual_total %}
+              {% set actual_price = ns.actual_total / 100 %}
+              ${{'%.2f' % actual_price|float}}
+              ({% if ns.actual_total - ns.cart_total > 0 %}+{% else %}-{% endif %}
+              {{ '%.2f' % ((ns.actual_total - ns.cart_total) / ns.cart_total * 100) | float |abs }}%)
+              <div class="strikethrough">
+                ${{'%.2f' % (ns.cart_total / 100)|float}}
+              </div>
+              {% else %}
+              {% set price = ns.cart_total / 100 %}
+              ${{'%.2f' % price|float}}
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

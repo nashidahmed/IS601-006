@@ -43,6 +43,10 @@ li.nav-item {
   width: 75rem;
 }
 
+.container-fluid.large {
+  width: 100rem;
+}
+
 .brand-logo {
   height: 2rem;
   width: 2rem;
@@ -90,7 +94,18 @@ label {
   height: auto;
 }
 
-.cart-image > img {
+.cart-image > img,
+.checkout-image > img {
   width: 100%;
   object-fit: cover;
+}
+
+.checkout-image {
+  width: 2rem;
+  height: auto;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+  color: gray;
 }

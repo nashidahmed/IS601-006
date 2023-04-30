@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, TextAreaField, IntegerField, URLField, SubmitField
+from wtforms import HiddenField, IntegerField, SubmitField
 from wtforms.validators import DataRequired, Length, Optional, NumberRange
 
 class CartForm(FlaskForm):
