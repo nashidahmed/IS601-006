@@ -132,11 +132,11 @@ def pay():
 def order(id):
     rows = []
     total = 0
+    order = {}
     if not id:
         flash("Invalid order", "danger")
         return redirect(url_for("orders.history"))
     try:
-        # locking query to order_id and user_id so the user can see only their orders
         result = DB.selectAll("""
         SELECT name, o.cost as cost, quantity, (o.cost * quantity) as subtotal, image
         FROM IS601_Shop_OrderProducts o

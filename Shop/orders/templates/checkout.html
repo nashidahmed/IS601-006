@@ -22,9 +22,10 @@
         </div>
         {{ render_field(form.address, placeholder="Enter your address", rows="7") }}
         {{ render_field(form.method) }}
+        {{ form.amount.label(class="form-label") }}
         <div class="input-group mb-3">
           <span class="input-group-text">$</span>
-          {{ form.amount(class="form-control", placeholder="Enter the amount")|safe }}
+          {{ form.amount(class="form-control", placeholder="Enter the amount to be paid")|safe }}
         </div>
         <div class="text-center mt-5">
           {{ form.submit(class="btn btn-primary") }}

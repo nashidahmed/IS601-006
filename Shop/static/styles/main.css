@@ -36,15 +36,15 @@ li.nav-item {
 }
 
 .container-fluid.small {
-  width: 50rem;
+  width: 50%;
 }
 
 .container-fluid.medium {
-  width: 75rem;
+  width: 70%;
 }
 
 .container-fluid.large {
-  width: 100rem;
+  width: 90%;
 }
 
 .brand-logo {
@@ -74,10 +74,18 @@ label {
 }
 
 .text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 35%;
+}
+
+.text-truncate-3 {
   display: -webkit-box !important;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   white-space: normal;
+  overflow: hidden;
 }
 
 .product-container {

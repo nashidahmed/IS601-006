@@ -20,6 +20,7 @@ Order - {{order.id}}
   <div>
     {% endif %}
     <div class="container-fluid large">
+      {% if order %}
       {% if 'confirmation' in request.path %}
       <div class="h2 text-center mt-3 mb-4">
         Order Confirmation
@@ -54,8 +55,18 @@ Order - {{order.id}}
               <div>{{order.payment_method.split('_')|map('capitalize')|join(' ')}}</div>
             </div>
           </div>
-          <div class="fw-bold">Order Date</div>
-          <div>{{order.created.strftime('%d %B %Y %H:%M')}} UTC</div>
+          <div class="row">
+            {% if current_user.has_role("Owner") %}
+            <div class="col">
+              <div class="fw-bold">Username</div>
+              <div>{{order.username}}</div>
+            </div>
+            {% endif %}
+            <div class="col">
+              <div class="fw-bold">Order Date</div>
+              <div>{{order.created.strftime('%d %B %Y %H:%M')}} UTC</div>
+            </div>
+          </div>
         </div>
         <div class="col-5">
           <table class="table card d-table">
@@ -107,6 +118,9 @@ Order - {{order.id}}
           </table>
         </div>
       </div>
+      {% else %}
+      <h4 class="text-center mt-5">Order unavailable</h4>
+      {% endif %}
     </div>
   </div>
   {% endblock %}

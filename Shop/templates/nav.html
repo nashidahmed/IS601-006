@@ -23,6 +23,9 @@
         {% call dropdown_nav(owner)%}
         Owner
         {% endcall %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('admin.order_history')}}">Purchases</a>
+        </li>
         {% set category = [
         ("categories.add", "Add"),
         ("categories.view", "View")
