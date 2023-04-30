@@ -19,16 +19,16 @@ Edit Product
   <div>
     <form method="POST">
       {{ form.hidden_tag() }}
-      {{ render_field(form.name) }}
-      {{ render_field(form.description) }}
+      {{ render_field(form.name, placeholder="Enter the name of the product") }}
+      {{ render_field(form.description, placeholder="Enter the product description") }}
       {{ render_field(form.category) }}
-      {{ render_field(form.stock) }}
+      {{ render_field(form.stock, placeholder="Enter the number of products in stock") }}
       {{ form.cost.label(class="form-label") }}
       <div class="input-group mb-3">
         <span class="input-group-text">$</span>
-        {{ form.cost(class="form-control")|safe }}
+        {{ form.cost(class="form-control", placeholder="Enter the cost of the product")|safe }}
       </div>
-      {{ render_field(form.image) }}
+      {{ render_field(form.image, placeholder="Enter an image link") }}
       {{ render_field(form.is_visible) }}
       {{ form.submit(class="btn btn-primary") }}
     </form>

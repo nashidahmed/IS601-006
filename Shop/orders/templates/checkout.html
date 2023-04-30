@@ -22,9 +22,10 @@
         </div>
         {{ render_field(form.address, placeholder="Enter your address", rows="7") }}
         {{ render_field(form.method) }}
+        {{ form.amount.label(class="form-label") }}
         <div class="input-group mb-3">
           <span class="input-group-text">$</span>
-          {{ form.amount(class="form-control", placeholder="Enter the amount")|safe }}
+          {{ form.amount(class="form-control", placeholder="Enter the amount to be paid")|safe }}
         </div>
         <div class="text-center mt-5">
           {{ form.submit(class="btn btn-primary") }}
@@ -42,9 +43,16 @@
         </thead>
         <tbody>
           {% set ns = namespace(cart_total=0, actual_total=0) %} {% for row in rows %}
-          <tr>
+          <tr class="vertical-align-middle">
             <td>
               <div class="ms-2">
+                <div class="checkout-image d-inline-block">
+                  {% if row.image %}
+                  <img src="{{row.image}}" alt="{{row.name}}" />
+                  {% else %}
+                  <img src="/static/images/no-image.jpg" alt="no image available" />
+                  {% endif %}
+                </div>
                 {{row.name}} x {{row.quantity}}
               </div>
             </td>

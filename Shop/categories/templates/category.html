@@ -11,15 +11,15 @@ Edit Category
 <div class="container-fluid small">
   <div class="h1 text-center my-4">
     {% if not is_edit %}
-    Add Product
+    Add Category
     {% else %}
-    Edit Product
+    Edit Category
     {% endif %}
   </div>
   <div>
     <form method="POST">
       {{ form.hidden_tag() }}
-      {{ render_field(form.name) }}
+      {{ render_field(form.name, placeholder="Enter the name of the category") }}
       {{ form.submit(class="btn btn-primary") }}
     </form>
   </div>

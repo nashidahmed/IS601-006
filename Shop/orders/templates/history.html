@@ -1,9 +1,12 @@
 <script type="text/javascript" charset="utf-8">
-  get_order = (e) => {
+  get_order = (e, is_admin = false) => {
     let id = e.getElementsByTagName("td")[0].innerText
-    console.log(id)
 
-    window.location.href = `${window.origin}/orders/${id}`
+    if (is_admin) {
+      window.location.href = `${window.origin}/admin/order/${id}`
+    } else {
+      window.location.href = `${window.origin}/orders/${id}`
+    }
   }
 </script>
 
@@ -11,12 +14,16 @@
 {% block title %}Orders{% endblock %}
 
 {% block content %}
-<div class="container large">
+<div class="container-fluid large">
+  {% if rows and rows|length > 0 %}
   <div class="h2 text-center mt-3 mb-4">Order History</div>
   <table class="table">
     <thead>
       <tr>
         <th>Order ID</th>
+        {% if current_user.has_role("Owner") %}
+        <th>Username</th>
+        {% endif %}
         <th>Name</th>
         <th>Number of products</th>
         <th>Address</th>
@@ -26,16 +33,33 @@
     </thead>
     <tbody>
       {% for row in rows %}
+      {% if current_user.has_role("Owner") %}
+      <tr class="cursor-pointer" onclick="get_order(this, true)">
+        {% else %}
       <tr class="cursor-pointer" onclick="get_order(this)">
+        {% endif %}
         <td>{{row.order_id}}</td>
+        {% if current_user.has_role("Owner") %}
+        <th>{{row.username}}</th>
+        {% endif %}
         <td>{{row.first_name + ' ' + row.last_name}}</td>
         <td>{{row.number_of_products}}</td>
-        <td class="white-space-pre-wrap">{{row.address}}</td>
+        <td class="white-space-pre-wrap" style="width: 35%;">{{row.address}}</td>
         <td>{{row.payment_method.split('_')|map('capitalize')|join(' ')}}</td>
         <td>${{'%.2f' % (row.money_received / 100)|float}}</td>
-        {% endfor %}
+      </tr>
+      {% endfor %}
     </tbody>
-    </tr>
   </table>
+  {% else %}
+  <div class="text-center">
+    <h5 class="mt-5">
+      No purchases made
+      <br />
+      <br />
+      <a href="{{url_for('shop.view_all')}}" class="btn btn-primary">View products</a>
+    </h5>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
