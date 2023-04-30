@@ -42,9 +42,16 @@
         </thead>
         <tbody>
           {% set ns = namespace(cart_total=0, actual_total=0) %} {% for row in rows %}
-          <tr>
+          <tr class="vertical-align-middle">
             <td>
               <div class="ms-2">
+                <div class="checkout-image d-inline-block">
+                  {% if row.image %}
+                  <img src="{{row.image}}" alt="{{row.name}}" />
+                  {% else %}
+                  <img src="/static/images/no-image.jpg" alt="no image available" />
+                  {% endif %}
+                </div>
                 {{row.name}} x {{row.quantity}}
               </div>
             </td>

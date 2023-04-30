@@ -124,21 +124,21 @@ def pay():
             traceback.print_exc()
     # TODO route to thank you / summary page
     # TODO add link from cart page to this route
-    return render_template("checkout.html", rows=cart, order=order, form=form)
+    return redirect(f'/orders/confirmation/{order_id}')
 
+@orders.route("/confirmation/<id>", methods=["GET"])
 @orders.route("/<id>", methods=["GET"])
 @login_required
 def order(id):
     rows = []
     total = 0
-    print(id)
     if not id:
         flash("Invalid order", "danger")
         return redirect(url_for("orders.history"))
     try:
         # locking query to order_id and user_id so the user can see only their orders
         result = DB.selectAll("""
-        SELECT name, o.cost as cost, quantity, (o.cost * quantity) as subtotal
+        SELECT name, o.cost as cost, quantity, (o.cost * quantity) as subtotal, image
         FROM IS601_Shop_OrderProducts o
         JOIN IS601_Shop_Products p on o.product_id = p.id
         WHERE order_id = %s AND user_id = %s 
@@ -157,6 +157,7 @@ def order(id):
         print("Error getting order", e)
         flash(str(e), "danger")
         flash("Error fetching order", "danger")
+
     return render_template("order.html", rows=rows, order=order, total=total)
 
 @orders.route("/history", methods=["GET"])
