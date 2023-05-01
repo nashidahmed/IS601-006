@@ -16,7 +16,13 @@
 {% block content %}
 <div class="container-fluid large">
   {% if rows and rows|length > 0 %}
-  <div class="h2 text-center mt-3 mb-4">Order History</div>
+  <div class="h2 text-center mt-3 mb-4">
+    {% if 'admin' in request.path %}
+    Shop Order History
+    {% else %}
+    My Order History
+    {% endif %}
+  </div>
   <table class="table">
     <thead>
       <tr>
