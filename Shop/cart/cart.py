@@ -43,6 +43,7 @@ def add():
 @login_required
 def view():
     rows = []
+    can_refresh = False
     try:
         result = DB.selectAll("""SELECT c.id, product_id, name, c.quantity, c.cost as cart_cost, p.cost as product_cost, (c.quantity * c.cost) as cart_subtotal, (c.quantity * p.cost) as actual_subtotal, image 
         FROM IS601_Shop_Cart c JOIN IS601_Shop_Products p on c.product_id = p.id
@@ -50,10 +51,17 @@ def view():
         """, current_user.get_id())
         if result and result.rows:
             rows = result.rows
+            for product in rows:
+                if product["cart_cost"] != product["product_cost"]:
+                    can_refresh = True
     except Exception as e:
         print("Error getting cart", e)
         flash("Error fetching cart", "danger")
-    return render_template("cart.html", rows=rows)
+
+    if can_refresh:
+        flash("The price for some items in your cart have changed, please refresh cart", "warning")
+    
+    return render_template("cart.html", rows=rows, can_refresh=can_refresh)
 
 @cart.route('/update', methods=['POST'])
 @login_required
@@ -106,7 +114,7 @@ def delete():
 def clear():
     user_id = current_user.get_id()
     try:
-        result = DB.delete("DELETE FROM IS601_Shop_Cart where user_id = %s", user_id)
+        result = DB.delete("DELETE FROM IS601_Shop_Cart WHERE user_id = %s", user_id)
         if result.status:
             flash("Cleared cart", "success")
     except Exception as e:
@@ -114,3 +122,26 @@ def clear():
         flash("Error clearing cart", "danger")
 
     return redirect(url_for('cart.view'))
+
+@cart.route('/refresh/<int:is_cart>', methods=['GET'])
+@login_required
+def refresh(is_cart):
+    user_id = current_user.get_id()
+    try:
+        result = DB.delete("""
+        UPDATE IS601_Shop_Cart c, IS601_Shop_Products p
+        SET c.cost = p.cost
+        WHERE c.product_id = p.id AND user_id = %s
+        """, user_id)
+        if result.status:
+            flash("Refreshed cart", "success")
+    except Exception as e:
+        print("Error refreshing cart", e)
+        flash(str(e), "danger")
+        flash("Error refreshing cart", "danger")
+
+    if is_cart == 1:
+        return redirect(url_for('cart.view'))
+    elif is_cart == 0:
+        return redirect(url_for('orders.view'))
+        

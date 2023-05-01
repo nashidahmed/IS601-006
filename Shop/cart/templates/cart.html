@@ -6,6 +6,9 @@
   <div class="h2 text-center mt-3 mb-4">Cart</div>
   {% if rows and rows|length > 0 %}
   <form method="POST" class="text-end my-3" action="{{url_for('cart.clear')}}">
+    {% if can_refresh %}
+    <a href="{{url_for('cart.refresh', is_cart=1)}}" class="btn btn-primary">Refresh cart</a>
+    {% endif %}
     <input type="submit" class="btn btn-primary" value="Clear cart" />
   </form>
   <table class="table">
