@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Checkout{% endblock %}
 {% from "_formhelpers.html" import render_field %}
+{% from "_price_with_diff.html" import price_with_diff %}
 {% from "country_state_selector.html" import country_state_selector %}
 
 {% block content %}
@@ -78,33 +79,13 @@
                 <div class="row">
                   <input type="hidden" name="product_id" value="{{row.product_id}}" />
                   <div class="col">
-                    {% if row.product_cost != row.cart_cost %}
-                    ${{'%.2f' % (row.product_cost / 100)|float}}
-                    ({% if row.product_cost - row.cart_cost > 0 %}+{% else %}-{% endif %}
-                    {{ '%.2f' % ((row.product_cost - row.cart_cost) / row.cart_cost * 100) | float |abs }}%)
-                    <div class="strikethrough">
-                      ${{'%.2f' % (row.cart_cost / 100)|float}}
-                    </div>
-                    {% else %}
-                    ${{'%.2f' % (row.product_cost / 100)|float}}
-                    {% endif %}
+                    {{ price_with_diff(row.cart_cost, row.product_cost) }}
                   </div>
                 </div>
               </form>
             </td>
             <td>
-              {% if row.cart_subtotal != row.actual_subtotal %}
-              {% set actual_price = row.actual_subtotal / 100 %}
-              ${{'%.2f' % actual_price|float}}
-              ({% if row.actual_subtotal - row.cart_subtotal > 0 %}+{% else %}-{% endif %}
-              {{ '%.2f' % ((row.actual_subtotal - row.cart_subtotal) / row.cart_subtotal * 100) | float |abs }}%)
-              <div class="strikethrough">
-                ${{'%.2f' % (row.cart_subtotal / 100)|float}}
-              </div>
-              {% else %}
-              {% set price = row.cart_subtotal / 100 %}
-              ${{'%.2f' % price|float}}
-              {% endif %}
+              {{ price_with_diff(row.cart_subtotal, row.actual_subtotal) }}
             </td>
             {% set ns.cart_total = ns.cart_total + row.cart_subtotal %}
             {% set ns.actual_total = ns.actual_total + row.actual_subtotal %}
@@ -114,18 +95,7 @@
             <td></td>
             <td class="text-end fw-bold">Total: </td>
             <td>
-              {% if ns.cart_total != ns.actual_total %}
-              {% set actual_price = ns.actual_total / 100 %}
-              ${{'%.2f' % actual_price|float}}
-              ({% if ns.actual_total - ns.cart_total > 0 %}+{% else %}-{% endif %}
-              {{ '%.2f' % ((ns.actual_total - ns.cart_total) / ns.cart_total * 100) | float |abs }}%)
-              <div class="strikethrough">
-                ${{'%.2f' % (ns.cart_total / 100)|float}}
-              </div>
-              {% else %}
-              {% set price = ns.cart_total / 100 %}
-              ${{'%.2f' % price|float}}
-              {% endif %}
+              {{ price_with_diff(ns.cart_total, ns.actual_total) }}
             </td>
           </tr>
         </tbody>
