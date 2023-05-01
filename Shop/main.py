@@ -40,6 +40,8 @@ def create_app(config_filename=''):
         app.register_blueprint(admin)
         from roles.roles import roles
         app.register_blueprint(roles)
+        from views.geography import geo
+        app.register_blueprint(geo)
         from views.shop import shop
         app.register_blueprint(shop)
         from cart.cart import cart

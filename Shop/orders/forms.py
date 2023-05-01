@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, DecimalField, TextAreaField, SubmitField, StringField, RadioField
-from wtforms.validators import DataRequired, Length, Optional, NumberRange
+from wtforms import HiddenField, DecimalField, SubmitField, StringField, RadioField, SelectField
+from wtforms.validators import DataRequired, Length, Optional, NumberRange, Regexp
 
 class PaymentForm(FlaskForm):
     id = HiddenField("id", validators=[Optional()])
@@ -8,5 +8,9 @@ class PaymentForm(FlaskForm):
     last_name = StringField("last name", validators=[DataRequired()])
     amount = DecimalField("payment amount", validators=[DataRequired(), NumberRange(min=0)])
     method = RadioField("payment method", validators=[DataRequired()], choices=[('CASH', 'Cash on Delivery'), ('DEBIT_CARD', 'Debit Card'), ('CREDIT_CARD', 'Credit card')])
-    address = TextAreaField("address", validators=[DataRequired()])
+    street_address = StringField("street address", validators=[DataRequired()])
+    city = StringField("city", validators=[DataRequired()])
+    zip = StringField("zip", validators=[DataRequired(),Length(min=5, max=6),Regexp('^\?[0-9]$', message="Zip code should be numeric with 5-6 digits")])
+    state = StringField("state", validators=[DataRequired()])
+    country = StringField("country", validators=[DataRequired()])
     submit = SubmitField("Confirm purchase")

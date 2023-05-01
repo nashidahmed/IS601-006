@@ -1,0 +1,65 @@
+{% macro country_state_selector(country="", state="") %}
+{% set c = country or '' %}
+{% set s = state or '' %}
+<script>
+  const fetchStates = (country) => {
+    let state = "{{s}}";
+
+    fetch(`{{url_for('geo.states')}}?country_code=${country}`).then(resp => resp.json())
+      .then(data => {
+        let ele = document.querySelector("select[name='state']");
+
+        if (ele.children.length > 1) {
+          ele.innerHTML = `<option value="">Select State...</option>`;
+        }
+
+        for (let d of data) {
+          let nele = document.createElement("option");
+          nele.value = d.code;
+          nele.innerText = d.name;
+          ele.appendChild(nele);
+        }
+
+        ele.value = state;
+      });
+  }
+  window.onload = () => {
+    let country = "{{c}}";
+
+    fetch(`{{url_for('geo.countries')}}`)
+      .then(resp => resp.json())
+      .then(data => {
+        let ele = document.querySelector("select[name='country']");
+        ele.value = "";
+
+        for (let d of data) {
+          let nele = document.createElement("option");
+          nele.value = d.code;
+          nele.innerText = d.name;
+          ele.appendChild(nele);
+        }
+
+        ele.value = country;
+      })
+      .finally(() => {
+        fetchStates(country);
+      });
+  };
+</script>
+{# version for filter forms #}
+<div class="row mb-3">
+  <div class="col">
+    <label class="form-label" for="country">Country</label>
+    <select name='country' id='country' class='form-select' value='{{c}}' onchange='fetchStates(this.value)'>
+      <option value="">Select Country...</option>
+    </select>
+  </div>
+  <div class="col">
+    <label class="form-label" for="state">State</label>
+    <select name='state' id='state' class='form-select' value='{{s}}'>
+      <option value="">Select State...</option>
+    </select>
+  </div>
+</div>
+
+{% endmacro %}

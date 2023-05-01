@@ -1,9 +1,20 @@
 import traceback
+import pycountry
 from flask import Blueprint, flash, render_template, request, redirect, url_for
 from sql.db import DB
 from orders.forms import PaymentForm
 from flask_login import login_required, current_user
 orders = Blueprint('orders', __name__, url_prefix='/orders',template_folder='templates')
+
+def generate_address(street, city, state, country, zip):
+    address = ''
+    print('state', state)
+    country_name = pycountry.countries.get(alpha_2=country).name
+    state_name = pycountry.subdivisions.get(code=state).name
+    arr = [street, city, state_name, country_name]
+    for i in range(len(arr)):
+        address += f'{arr[i]}\n' if i != 3 else f'{arr[i]} {zip}'
+    return address
 
 @orders.route("/checkout", methods=["GET"])
 @login_required
@@ -34,39 +45,63 @@ def view():
 @login_required
 def pay():
     form = PaymentForm()
+    can_refresh = False
     cart = []
     total = 0
     quantity = 0
     order = {}
     amount = round((form.amount.data or 0) * 100)
-    address = form.address.data
+    street_address = form.street_address.data
+    city = form.city.data
+    state = form.state.data
+    country = form.country.data
+    zip = form.zip.data
     method = form.method.data
     first_name = form.first_name.data
     last_name = form.last_name.data
+    print(form.country.data)
+    print(form.state.data)
     
     if form.validate_on_submit:
         try:
             DB.getDB().autocommit = False
+            has_error = False
 
             # Fetch cart data
-            result = DB.selectAll("""SELECT c.id, product_id, name, quantity, stock, c.cost as cart_cost, p.cost as product_cost, (c.quantity * c.cost) as cart_subtotal, (c.quantity * p.cost) as actual_subtotal 
+            result = DB.selectAll("""SELECT c.id, product_id, name, quantity, stock, c.cost as cart_cost, p.cost as product_cost, (c.quantity * c.cost) as cart_subtotal, (c.quantity * p.cost) as actual_subtotal, image 
             FROM IS601_Shop_Cart c JOIN IS601_Shop_Products p on c.product_id = p.id
             WHERE c.user_id = %s
             """, current_user.get_id())
             if result.status and result.rows:
                 cart = result.rows
 
+            if not country:
+                flash('Please enter the country', 'danger')
+                has_error = True
+            elif not state:
+                flash('Please enter the state', 'danger')
+                has_error = True
+            elif country not in list(map(lambda c: c.alpha_2, pycountry.countries)):
+                flash('Country does not exist', 'danger')
+                has_error = True
+            elif state not in list(map(lambda s: s.code, pycountry.subdivisions.get(country_code=country.strip()))):
+                flash('State does not exist', 'danger')
+                has_error = True
+
             # Verify that there are enough products in stock or if the price has change for the cart items
-            has_error = False
-            for product in cart:
-                if product["quantity"] > product["stock"]:
-                    flash(f"There are only {product['stock']} of product {product['name']} left in stock", "warning")
-                    has_error = True
-                if product["cart_cost"] != product["product_cost"]:
-                    flash(f"Product {product['name']}'s price has changed, please refresh cart", "warning")
-                    has_error = True
-                total += int(product["cart_subtotal"] or 0)
-                quantity += int(product["quantity"])
+            if not has_error:
+                address = generate_address(street_address, city, state, country, zip)
+                
+                for product in cart:
+                    if product["quantity"] > product["stock"]:
+                        flash(f"There are only {product['stock']} of product {product['name']} left in stock", "warning")
+                        has_error = True
+                    if product["cart_cost"] != product["product_cost"]:
+                        flash("The price for some items in your cart have changed, please refresh cart", "warning")
+                        can_refresh = True
+                        has_error = True
+                    total += int(product["cart_subtotal"] or 0)
+                    quantity += int(product["quantity"])
 
             # Check if user has entered the right amount
             if not has_error:
@@ -118,20 +153,24 @@ def pay():
             # Empty the cart for this user
             if not has_error:
                 result = DB.delete("DELETE FROM IS601_Shop_Cart WHERE user_id = %s", current_user.get_id())
+                if not result.status:
+                    flash("Error deleting cart", "danger")
+                    has_error = True
+                    DB.getDB().rollback()
 
             if not has_error:
                 DB.getDB().commit()
                 flash("Payment successful!", "success")
-            # else:
-            #     return redirect(url_for("cart.view"))
+            else:
+                return render_template("checkout.html", rows=cart, form=form, can_refresh=can_refresh)
                 
         except Exception as e:
             print("Transaction exception", e)
             flash(str(e), "danger")
             flash("Something went wrong", "danger")
             traceback.print_exc()
-    # TODO route to thank you / summary page
-    # TODO add link from cart page to this route
+            return render_template("checkout.html", rows=cart, form=form, can_refresh=can_refresh)
+
     return redirect(f'/orders/confirmation/{order_id}')
 
 @orders.route("/confirmation/<id>", methods=["GET"])

@@ -56,7 +56,7 @@ Order - {{order.id}}
             </div>
           </div>
           <div class="row">
-            {% if current_user.has_role("Owner") %}
+            {% if current_user.has_role("Owner") and 'confirmation' not in request.path %}
             <div class="col">
               <div class="fw-bold">Username</div>
               <div>{{order.username}}</div>

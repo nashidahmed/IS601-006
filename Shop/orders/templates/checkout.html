@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Checkout{% endblock %}
 {% from "_formhelpers.html" import render_field %}
+{% from "country_state_selector.html" import country_state_selector %}
 
 {% block content %}
 <div class="container-fluid large">
@@ -23,7 +24,20 @@
             {{ render_field(form.last_name, placeholder="Enter your last name") }}
           </div>
         </div>
-        {{ render_field(form.address, placeholder="Enter your address", rows="7") }}
+        <div class="row">
+          <div class="col">
+            {{ render_field(form.street_address, placeholder="Enter your address") }}
+          </div>
+          <div class="col">
+            {{ render_field(form.city, placeholder="Enter your city") }}
+          </div>
+        </div>
+        {{country_state_selector(country = form.country.data, state = form.state.data)}}
+        <div class="row">
+          <div class="col-6">
+            {{ render_field(form.zip, placeholder="Enter your zip code") }}
+          </div>
+        </div>
         {{ render_field(form.method) }}
         {{ form.amount.label(class="form-label") }}
         <div class="input-group mb-3">

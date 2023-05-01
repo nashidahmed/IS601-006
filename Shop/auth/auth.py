@@ -37,6 +37,7 @@ def register():
             result = DB.insertOne("INSERT INTO IS601_Users (email, username, password) VALUES (%s, %s, %s)", email, username, hash)
             if result.status:
                 flash("Successfully registered","success")
+                return redirect(url_for('auth.login'))
         except Exception as e:
             check_duplicate(e)
     return render_template("register.html", form=form)
