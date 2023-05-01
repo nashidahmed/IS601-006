@@ -1,0 +1,18 @@
+{% macro price_with_diff(old_price = 0, new_price = 0) %}
+{% if old_price != new_price %}
+${{'%.2f' % (new_price / 100)|float}}
+{% if new_price - old_price > 0 %}
+<span class="text-danger">
+  {% else %}
+  <span class="text-success">
+    {% endif %}
+    ({% if new_price - old_price > 0 %}+{% else %}-{% endif %}
+    {{ '%.2f' % ((new_price - old_price) / old_price * 100) | float |abs }}%)
+  </span>
+  <div class="strikethrough">
+    ${{'%.2f' % (old_price / 100)|float}}
+  </div>
+  {% else %}
+  ${{'%.2f' % (new_price / 100)|float}}
+  {% endif %}
+  {% endmacro %}
