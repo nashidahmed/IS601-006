@@ -1,7 +1,7 @@
 <link href="/static/styles/order.css" rel="stylesheet">
 {% extends "layout.html" %}
 {% block title %}
-{% if 'confirmation' in request.path %}
+{% if is_confirmation %}
 Order Confirmation
 {% else %}
 Order - {{order.id}}
@@ -11,7 +11,7 @@ Order - {{order.id}}
 <!-- content -->
 {% block content %}
 
-{% if 'confirmation' in request.path %}
+{% if is_confirmation %}
 <div class="wrapper">
   {% for i in range(149) %}
   <div class="confetti-{{i}}"></div>
@@ -21,7 +21,7 @@ Order - {{order.id}}
     {% endif %}
     <div class="container-fluid large">
       {% if order %}
-      {% if 'confirmation' in request.path %}
+      {% if is_confirmation %}
       <div class="h2 text-center mt-3 mb-4">
         Order Confirmation
       </div>
@@ -35,7 +35,7 @@ Order - {{order.id}}
       <div class="row">
         <div class="col">
           <div class="h4 text-center mt-3 mb-5">Shipping Information</div>
-          {% if current_user.has_role("Owner") and 'confirmation' not in request.path %}
+          {% if current_user.has_role("Owner") and not is_confirmation %}
           <div class="row mb-4">
             <div class="col">
               <div class="fw-bold">Username</div>
