@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block title %}Checkout{% endblock %}
+{% from "_formhelpers.html" import render_field %}
+{% from "_price_with_diff.html" import price_with_diff %}
+{% from "country_state_selector.html" import country_state_selector %}
+
+{% block content %}
+<div class="container-fluid large">
+  <div class="h2 text-center mt-3 mb-4">Checkout</div>
+  <div class="my-3 d-flex justify-content-between">
+    <a href="{{ url_for('cart.view') }}" class="btn btn-secondary">Back to cart</a>
+    {% if can_refresh %}
+    <a href="{{url_for('cart.refresh', is_cart=0)}}" class="btn btn-primary">Refresh cart</a>
+    {% endif %}
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="h4 text-center mt-3 mb-4">Shipping Information</div>
+      <form method="POST">
+        <div class="row">
+          <div class="col">
+            {{ render_field(form.first_name, placeholder="Enter your first name") }}
+          </div>
+          <div class="col">
+            {{ render_field(form.last_name, placeholder="Enter your last name") }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            {{ render_field(form.street_address, placeholder="Enter your address") }}
+          </div>
+          <div class="col">
+            {{ render_field(form.city, placeholder="Enter your city") }}
+          </div>
+        </div>
+        {{country_state_selector(country = form.country.data, state = form.state.data)}}
+        <div class="row">
+          <div class="col-6">
+            {{ render_field(form.zip, placeholder="Enter your zip code") }}
+          </div>
+        </div>
+        {{ render_field(form.method) }}
+        {{ form.amount.label(class="form-label") }}
+        <div class="input-group mb-3">
+          <span class="input-group-text">$</span>
+          {{ form.amount(class="form-control", placeholder="Enter the amount to be paid")|safe }}
+        </div>
+        <div class="text-center mt-5">
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+    <div class="col-5">
+      <table class="table card d-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set ns = namespace(cart_total=0, actual_total=0) %} {% for row in rows %}
+          <tr class="vertical-align-middle">
+            <td>
+              <div class="ms-2">
+                <div class="checkout-image d-inline-block">
+                  {% if row.image %}
+                  <img src="{{row.image}}" alt="{{row.name}}" />
+                  {% else %}
+                  <img src="/static/images/no-image.jpg" alt="no image available" />
+                  {% endif %}
+                </div>
+                {{row.name}} x {{row.quantity}}
+              </div>
+            </td>
+            <td>
+              <form method="POST" action="{{url_for('cart.update')}}">
+                <div class="row">
+                  <input type="hidden" name="product_id" value="{{row.product_id}}" />
+                  <div class="col">
+                    {{ price_with_diff(row.cart_cost, row.product_cost) }}
+                  </div>
+                </div>
+              </form>
+            </td>
+            <td>
+              {{ price_with_diff(row.cart_subtotal, row.actual_subtotal) }}
+            </td>
+            {% set ns.cart_total = ns.cart_total + row.cart_subtotal %}
+            {% set ns.actual_total = ns.actual_total + row.actual_subtotal %}
+          </tr>
+          {% endfor %}
+          <tr>
+            <td></td>
+            <td class="text-end fw-bold">Total: </td>
+            <td>
+              {{ price_with_diff(ns.cart_total, ns.actual_total) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

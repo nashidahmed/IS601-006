@@ -23,6 +23,9 @@
         {% call dropdown_nav(owner)%}
         Owner
         {% endcall %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('admin.order_history')}}">Purchases</a>
+        </li>
         {% set category = [
         ("categories.add", "Add"),
         ("categories.view", "View")
@@ -47,6 +50,7 @@
       ('', current_user.username),
       ("auth.profile", "View Profile"),
       ("cart.view", "View Cart"),
+      ("orders.history", "View Order history"),
       ("auth.logout", "Logout"),
       ] %}
       {% if not current_user.is_authenticated %}

@@ -9,7 +9,7 @@ admin = Blueprint('admin', __name__, url_prefix='/admin',template_folder='templa
 @admin_owner_permission.require(http_exception=403)
 def add():
     form = AddProductForm(is_visible = True)
-    if form.validate_on_submit:
+    if request.method == 'POST' and form.validate_on_submit:
       name = form.name.data
       description = form.description.data
       category = form.category.data
@@ -28,6 +28,12 @@ def add():
                   flash('Duplicate data. Product name may already exist', 'danger')
               else:
                   flash("Unable to add product", "danger")
+      elif stock == 0:
+            flash('Stock cannot be 0', 'danger')
+      elif cost == 0:
+          flash('Cost cannot be 0', 'danger')
+      else:
+          flash('Please check your input', 'danger')
       
     categories = []
     try:
@@ -98,3 +104,57 @@ def set_visibility(is_visible, product_id, name):
         flash("Could not toggle visibility", "danger")
 
     return redirect(url_for('admin.products'))
+
+@admin.route("/order-history", methods=["GET"])
+@admin_owner_permission.require(http_exception=403)
+def order_history():
+    rows = []
+    try:
+        result = DB.selectAll("""
+        SELECT o.id as order_id, number_of_products, address, payment_method, money_received, first_name, last_name, u.username
+        FROM IS601_Shop_Orders o
+        LEFT JOIN IS601_Users u ON o.user_id = u.id
+        """)
+        if result.status and result.rows:
+            rows = result.rows
+    except Exception as e:
+        print("Error getting orders", e)
+        flash(str(e), "danger")
+        flash("Error fetching orders", "danger")
+    return render_template("history.html", rows=rows)
+
+@admin.route("order/<id>", methods=["GET"])
+@admin_owner_permission.require(http_exception=403)
+def order(id):
+    rows = []
+    total = 0
+    order = {}
+    if not id:
+        flash("Invalid order", "danger")
+        return redirect(url_for("orders.history"))
+    try:
+        result = DB.selectAll("""
+        SELECT name, o.cost as cost, quantity, (o.cost * quantity) as subtotal, image
+        FROM IS601_Shop_OrderProducts o
+        JOIN IS601_Shop_Products p on o.product_id = p.id
+        WHERE order_id = %s
+        """, id)
+        if result.status and result.rows:
+            rows = result.rows
+            total = sum(int(row["subtotal"]) for row in rows)
+
+        result = DB.selectOne("""
+        SELECT o.id, number_of_products, address, payment_method, money_received, first_name, last_name, o.created, u.username
+        FROM IS601_Shop_Orders o
+        LEFT JOIN IS601_Users u ON o.user_id = u.id
+        WHERE o.id = %s
+        """, id)
+        if result.status and result.row:
+            order = result.row
+        
+    except Exception as e:
+        print("Error getting order", e)
+        flash(str(e), "danger")
+        flash("Error fetching order", "danger")
+
+    return render_template("order.html", rows=rows, order=order, total=total)

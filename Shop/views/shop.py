@@ -67,7 +67,7 @@ def view(id):
 @admin_owner_permission.require(http_exception=403)
 def edit(id):
     form = EditProductForm()
-    if form.validate_on_submit:
+    if request.method == 'POST' and form.validate_on_submit:
         name = form.name.data
         description = form.description.data
         category = form.category.data
@@ -81,10 +81,18 @@ def edit(id):
                 if result.status:
                     flash("Updated product", "success")
             except Exception as e:
+                flash(str(e), 'danger')
                 if '1062' in str(e):
                     flash('Duplicate data. Product name may already exist', 'danger')
                 else:
                     flash(f"Could not update product id: {id}", "danger")
+        elif stock == 0:
+            flash('Stock cannot be 0', 'danger')
+        elif cost == 0:
+            flash('Cost cannot be 0', 'danger')
+        else:
+            flash('Please check your input', 'danger')
+
     try:
         resp = DB.selectOne("SELECT id, name, description, category_id as category, stock, cost, image, is_visible from IS601_Shop_Products WHERE id = %s", id)
         if resp.status:

@@ -1,4 +1,5 @@
 {% extends "layout.html" %} {% block title %}Cart{% endblock %}
+{% from "_price_with_diff.html" import price_with_diff %}
 
 <!-- content -->
 {% block content %}
@@ -6,20 +7,24 @@
   <div class="h2 text-center mt-3 mb-4">Cart</div>
   {% if rows and rows|length > 0 %}
   <form method="POST" class="text-end my-3" action="{{url_for('cart.clear')}}">
+    {% if can_refresh %}
+    <a href="{{url_for('cart.refresh', is_cart=1)}}" class="btn btn-primary">Refresh cart</a>
+    {% endif %}
     <input type="submit" class="btn btn-primary" value="Clear cart" />
   </form>
   <table class="table">
     <thead>
       <tr>
-        <th>Item</th>
+        <th>Product</th>
+        <th>Unit price</th>
         <th>Quantity</th>
         <th>Subtotal</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      {% set ns = namespace(total=0) %} {% for row in rows %}
-      <tr>
+      {% set ns = namespace(cart_total=0, actual_total=0) %} {% for row in rows %}
+      <tr class="vertical-align-middle">
         <td class="d-flex align-items-center">
           <div class="cart-image">
             {% if row.image %}
@@ -29,6 +34,9 @@
             {% endif %}
           </div>
           <h5 class="ms-3">{{row.name}}</h5>
+        </td>
+        <td>
+          {{ price_with_diff(row.cart_cost, row.product_cost) }}
         </td>
         <td style="width: 15rem">
           <form method="POST" action="{{url_for('cart.update')}}">
@@ -44,8 +52,7 @@
           </form>
         </td>
         <td>
-          {% set price = row.subtotal / 100 %}
-          <div class="mt-2 mb-3">${{'%.2f' % price|float}}</div>
+          {{ price_with_diff(row.cart_subtotal, row.actual_subtotal) }}
         </td>
         <td>
           <form method="POST" action="{{url_for('cart.delete')}}">
@@ -56,16 +63,22 @@
             <input type="submit" value="x" class="btn btn-danger btn-sm" />
           </form>
         </td>
-        {% set ns.total = ns.total + row.subtotal %}
+        {% set ns.cart_total = ns.cart_total + row.cart_subtotal %}
+        {% set ns.actual_total = ns.actual_total + row.actual_subtotal %}
       </tr>
       {% endfor %}
       <tr>
-        <td class="text-end" colspan="100%">
-          {% set total = ns.total / 100 %} Total: ${{'%.2f' % total|float}}
+        <td></td>
+        <td colspan="2" class="text-end fw-bold">Total: </td>
+        <td colspan="2">
+          {{ price_with_diff(ns.cart_total, ns.actual_total) }}
         </td>
       </tr>
     </tbody>
   </table>
+  <div class="text-center">
+    <a href="{{url_for('orders.view')}}" class="btn btn-primary">Checkout</a>
+  </div>
   {% else %}
   <div class="text-center" colspan="100%">
     <h5 class="mt-5">

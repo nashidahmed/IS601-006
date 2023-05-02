@@ -2,7 +2,7 @@
 {% block title %}View Categories{% endblock %}
 {% block content %}
 <div class="container-fluid small">
-  <div class="h1 text-center">View Categories</div>
+  <div class="h1 text-center my-5">View Categories</div>
   <table class="table">
     {% if rows and rows|length > 0 %}
     <thead>
@@ -10,6 +10,7 @@
         {% for r in rows[0] %}
         <th>{{r}}</th>
         {% endfor %}
+        <th class="text-end">Actions</th>
       </tr>
     </thead>
     {% for r in rows %}
@@ -17,7 +18,7 @@
       {% for v in r.values() %}
       <td>{{v}}</td>
       {% endfor %}
-      <td>
+      <td class="text-end">
         <a href="{{url_for('categories.edit', id=r.get('id'))}}" class="btn btn-secondary btn-sm">Edit</a>
         <a href="{{url_for('categories.delete', id=r.get('id'))}}" class="btn btn-danger btn-sm">x</a>
       </td>
