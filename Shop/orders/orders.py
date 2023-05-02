@@ -6,6 +6,12 @@ from orders.forms import PaymentForm
 from flask_login import login_required, current_user
 orders = Blueprint('orders', __name__, url_prefix='/orders',template_folder='templates')
 
+# nn379 May 1 2023
+# Generate the address using the 5 address fields in the purchase form. It takes the street, city, state, country and zip and return a string with line breaks of the following format
+# {street}
+# {city}
+# {state}
+# {country} {zip}
 def generate_address(street, city, state, country, zip):
     address = ''
     print('state', state)
@@ -73,6 +79,9 @@ def pay():
             if result.status and result.rows:
                 cart = result.rows
 
+            # nn379 May 1 2023
+            # Check if country or state exist, if not inform the user
+            # Check if the country and state exist in pycountry, if not inform the user
             if not country:
                 flash('Please enter the country', 'danger')
                 has_error = True
@@ -86,6 +95,7 @@ def pay():
                 flash('State does not exist', 'danger')
                 has_error = True
 
+            # Generate the address from the address fields entered by the user
             # Verify that there are enough products in stock or if the price has change for the cart items
             if not has_error:
                 address = generate_address(street_address, city, state, country, zip)
@@ -140,7 +150,11 @@ def pay():
             if not has_error:
                 result = DB.update("""
                 UPDATE IS601_Shop_Products 
-                SET stock = stock - (select IFNULL(quantity, 0) FROM IS601_Shop_Cart WHERE product_id = IS601_Shop_Products.id and user_id = %(uid)s) 
+                SET stock = stock - (
+                    SELECT IFNULL(quantity, 0)
+                    FROM IS601_Shop_Cart
+                    WHERE product_id = IS601_Shop_Products.id and user_id = %(uid)s
+                ) 
                 WHERE id in (SELECT product_id from IS601_Shop_Cart where user_id = %(uid)s)
                 """, { "uid": current_user.get_id() })
                 if not result.status:
@@ -197,13 +211,17 @@ def order(id):
         """, id, current_user.get_id())
         if result.status and result.row:
             order = result.row
-        
+            
     except Exception as e:
         print("Error getting order", e)
         flash(str(e), "danger")
         flash("Error fetching order", "danger")
+    
+    if not order:
+        flash('Order unavailable or permission denied', 'danger')
+        return redirect(url_for('orders.history'))
 
-    return render_template("order.html", rows=rows, order=order, total=total)
+    return render_template("order.html", rows=rows, order=order, total=total, is_confirmation='confirmation' in request.path)
 
 @orders.route("/history", methods=["GET"])
 @login_required

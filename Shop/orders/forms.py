@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, DecimalField, SubmitField, StringField, RadioField, SelectField
+from wtforms import HiddenField, DecimalField, SubmitField, StringField, RadioField
 from wtforms.validators import DataRequired, Length, Optional, NumberRange, Regexp
 
+# nn379 Apr 30 2023
 class PaymentForm(FlaskForm):
     id = HiddenField("id", validators=[Optional()])
     first_name = StringField("first name", validators=[DataRequired()])
