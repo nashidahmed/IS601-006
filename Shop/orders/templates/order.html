@@ -66,7 +66,9 @@ Order - {{order.id}}
           <div class="row">
             <div class="col">
               <div class="fw-bold">Amount paid</div>
-              <div>{{order.money_received}}</div>
+
+
+              <div>${{'%.2f' % (order.money_received / 100)|float}}</div>
             </div>
             <div class="col">
               <div class="fw-bold">Order Date</div>
