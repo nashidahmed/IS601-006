@@ -27,7 +27,7 @@
     <thead>
       <tr>
         <th>Order ID</th>
-        {% if current_user.has_role("Owner") %}
+        {% if current_user.has_role("Owner") and 'admin' in request.path %}
         <th>Username</th>
         {% endif %}
         <th>Name</th>
@@ -45,7 +45,7 @@
       <tr class="cursor-pointer" onclick="get_order(this)">
         {% endif %}
         <td>{{row.order_id}}</td>
-        {% if current_user.has_role("Owner") %}
+        {% if current_user.has_role("Owner") and 'admin' in request.path %}
         <th>{{row.username}}</th>
         {% endif %}
         <td>{{row.first_name + ' ' + row.last_name}}</td>
