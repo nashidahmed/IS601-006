@@ -16,6 +16,9 @@
       <div class="h3 mt-3 mb-4">{{resp.name}}</div>
       {% set price = resp.cost / 100 %}
       <div class="mt-2 mb-3">Price: ${{'%.2f' % price|float}}</div>
+      {% if current_user.is_authenticated and current_user.has_role("Owner") %}
+      <div class="mt-2 mb-3">Stock: {{resp.stock}}</div>
+      {% endif %}
       <div>{{resp.description}}</div>
       <form class="mt-4" method="POST" action="{{url_for('cart.add')}}">
         {{ form.hidden_tag() }}
@@ -27,9 +30,6 @@
         <div class="edit-btn">
           <a class="btn btn-primary" href="{{url_for('shop.edit', id = resp.id)}}">Edit</a>
         </div>
-        {# <div class="delete">
-          <button class="btn btn-danger">Delete</button>
-        </div> #}
       </div>
       {% endif %}
     </div>

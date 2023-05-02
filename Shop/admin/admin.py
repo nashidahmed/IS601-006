@@ -9,7 +9,7 @@ admin = Blueprint('admin', __name__, url_prefix='/admin',template_folder='templa
 @admin_owner_permission.require(http_exception=403)
 def add():
     form = AddProductForm(is_visible = True)
-    if form.validate_on_submit:
+    if request.method == 'POST' and form.validate_on_submit:
       name = form.name.data
       description = form.description.data
       category = form.category.data
@@ -28,6 +28,12 @@ def add():
                   flash('Duplicate data. Product name may already exist', 'danger')
               else:
                   flash("Unable to add product", "danger")
+      elif stock == 0:
+            flash('Stock cannot be 0', 'danger')
+      elif cost == 0:
+          flash('Cost cannot be 0', 'danger')
+      else:
+          flash('Please check your input', 'danger')
       
     categories = []
     try:

@@ -34,7 +34,15 @@ Order - {{order.id}}
       {% endif %}
       <div class="row">
         <div class="col">
-          <div class="h4 text-center mt-3 mb-4">Payment Information</div>
+          <div class="h4 text-center mt-3 mb-5">Shipping Information</div>
+          {% if current_user.has_role("Owner") and 'confirmation' not in request.path %}
+          <div class="row mb-4">
+            <div class="col">
+              <div class="fw-bold">Username</div>
+              <div>{{order.username}}</div>
+            </div>
+          </div>
+          {% endif %}
           <div class="row mb-4">
             <div class="col">
               <div class="fw-bold">First Name </div>
@@ -47,7 +55,7 @@ Order - {{order.id}}
           </div>
           <div class="row">
             <div class="col">
-              <div class="fw-bold">Address </div>
+              <div class="fw-bold">Shipping address</div>
               <div class="white-space-pre-wrap mb-4">{{order.address}}</div>
             </div>
             <div class="col">
@@ -56,12 +64,10 @@ Order - {{order.id}}
             </div>
           </div>
           <div class="row">
-            {% if current_user.has_role("Owner") and 'confirmation' not in request.path %}
             <div class="col">
-              <div class="fw-bold">Username</div>
-              <div>{{order.username}}</div>
+              <div class="fw-bold">Amount paid</div>
+              <div>{{order.money_received}}</div>
             </div>
-            {% endif %}
             <div class="col">
               <div class="fw-bold">Order Date</div>
               <div>{{order.created.strftime('%d %B %Y %H:%M')}} UTC</div>
