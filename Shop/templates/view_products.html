@@ -36,6 +36,15 @@
               {% set price = r.cost / 100 %}
               <h6 class="mt-4">Price: ${{'%.2f' % price|float}}</h6>
               {% if is_admin %}
+              <h6 class="mt-4">Stock: {{r.stock}}</h6>
+              {% endif %}
+            </div>
+            {% if current_user.is_authenticated and current_user.has_role("Owner") %}
+            <div class="d-flex justify-content-between">
+              <div class="edit-btn">
+                <a class="btn btn-primary btn-sm" href="{{url_for('shop.edit', id = r.id)}}">Edit</a>
+              </div>
+              {% if is_admin %}
               {% if r.is_visible %}
               <a href="{{url_for('admin.set_visibility', is_visible = 0, product_id = r.id, name = r.name)}}">
                 <img src="/static/images/visible.svg" height="20" width="20" />
@@ -46,15 +55,6 @@
               </a>
               {% endif %}
               {% endif %}
-            </div>
-            {% if current_user.is_authenticated and current_user.has_role("Owner") %}
-            <div class="d-flex justify-content-between">
-              <div class="edit-btn">
-                <a class="btn btn-primary btn-sm" href="{{url_for('shop.edit', id = r.id)}}">Edit</a>
-              </div>
-              {# <div class="delete">
-                <button class="btn btn-danger">Delete</button>
-              </div> #}
             </div>
             {% endif %}
           </div>

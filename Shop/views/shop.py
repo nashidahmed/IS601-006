@@ -67,7 +67,7 @@ def view(id):
 @admin_owner_permission.require(http_exception=403)
 def edit(id):
     form = EditProductForm()
-    if form.validate_on_submit:
+    if request.method == 'POST' and form.validate_on_submit:
         name = form.name.data
         description = form.description.data
         category = form.category.data

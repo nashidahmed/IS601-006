@@ -20,7 +20,7 @@ Edit Product
     <form method="POST">
       {{ form.hidden_tag() }}
       {{ render_field(form.name, placeholder="Enter the name of the product") }}
-      {{ render_field(form.description, placeholder="Enter the product description") }}
+      {{ render_field(form.description, placeholder="Enter the product description", rows="5") }}
       {{ render_field(form.category) }}
       {{ render_field(form.stock, placeholder="Enter the number of products in stock") }}
       {{ form.cost.label(class="form-label") }}
