@@ -14,7 +14,6 @@ orders = Blueprint('orders', __name__, url_prefix='/orders',template_folder='tem
 # {country} {zip}
 def generate_address(street, city, state, country, zip):
     address = ''
-    print('state', state)
     country_name = pycountry.countries.get(alpha_2=country).name
     state_name = pycountry.subdivisions.get(code=state).name
     arr = [street, city, state_name, country_name]

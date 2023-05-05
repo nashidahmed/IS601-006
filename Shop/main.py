@@ -59,17 +59,14 @@ def create_app(config_filename=''):
         def load_user(user_id):
             if user_id is None:
                 return None
-            print("login_manager loading user") # happens each request
             from auth.models import User
             if session["_user_id"] == user_id and "user" in session.keys():
-                print("loading user from session")
                 # load user from session (convert json to User)
                 # see User object for convering json of roles to [Roles]
                 import jsons
                 return jsons.loads(session["user"], User)
             # failsafe if we don't have a "user" key in session
             from sql.db import DB
-            print("loading user from DB") # note: we'd lose roles here since it makes a new user object without a roles query
             try:
                 result = DB.selectOne("SELECT id, email FROM IS601_Users WHERE id = %s", user_id)
                 if result.status:
