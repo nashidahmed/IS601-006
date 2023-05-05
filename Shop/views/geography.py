@@ -7,7 +7,6 @@ geo = Blueprint("geo", __name__, url_prefix='/geo')
 @geo.route("/countries")
 def countries():
     # extract just the data we need for our <select> options
-    print('entered here')
     countries = map(lambda c: {"code": c.alpha_2, "name": c.name},list(pycountry.countries))
     return json.dumps(list(countries))
 
