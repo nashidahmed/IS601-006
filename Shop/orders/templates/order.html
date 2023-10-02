@@ -1,0 +1,134 @@
+<link href="/static/styles/order.css" rel="stylesheet">
+{% extends "layout.html" %}
+{% block title %}
+{% if is_confirmation %}
+Order Confirmation
+{% else %}
+Order - {{order.id}}
+{% endif %}
+{% endblock %}
+
+<!-- content -->
+{% block content %}
+
+{% if is_confirmation %}
+<div class="wrapper">
+  {% for i in range(149) %}
+  <div class="confetti-{{i}}"></div>
+  {% endfor %}
+  {% else %}
+  <div>
+    {% endif %}
+    <div class="container-fluid large">
+      {% if order %}
+      {% if is_confirmation %}
+      <div class="h2 text-center mt-3 mb-4">
+        Order Confirmation
+      </div>
+      <div class="my-5 text-center">
+        <div class="h3 animate-charcter">Thank you for shopping with us!</div>
+      </div>{% else %}
+      <div class="h2 text-center mt-3 mb-4">
+        Order ID: {{order.id}}
+      </div>
+      {% endif %}
+      <div class="row">
+        <div class="col">
+          <div class="h4 text-center mt-3 mb-5">Shipping Information</div>
+          {% if current_user.has_role("Owner") and not is_confirmation %}
+          <div class="row mb-4">
+            <div class="col">
+              <div class="fw-bold">Username</div>
+              <div>{{order.username}}</div>
+            </div>
+          </div>
+          {% endif %}
+          <div class="row mb-4">
+            <div class="col">
+              <div class="fw-bold">First Name </div>
+              {{order.first_name}}
+            </div>
+            <div class="col">
+              <div class="fw-bold">Last Name </div>
+              {{order.last_name}}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="fw-bold">Shipping address</div>
+              <div class="white-space-pre-wrap mb-4">{{order.address}}</div>
+            </div>
+            <div class="col">
+              <div class="fw-bold">Payment method</div>
+              <div>{{order.payment_method.split('_')|map('capitalize')|join(' ')}}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="fw-bold">Amount paid</div>
+
+
+              <div>${{'%.2f' % (order.money_received / 100)|float}}</div>
+            </div>
+            <div class="col">
+              <div class="fw-bold">Order Date</div>
+              <div>{{order.created.strftime('%d %B %Y %H:%M')}} UTC</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-5">
+          <table class="table card d-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Unit Price</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr>
+                <td>
+                  <div class="ms-2">
+                    <div class="checkout-image d-inline-block">
+                      {% if row.image %}
+                      <img src="{{row.image}}" alt="{{row.name}}" />
+                      {% else %}
+                      <img src="/static/images/no-image.jpg" alt="no image available" />
+                      {% endif %}
+                    </div>
+                    {{row.name}} x {{row.quantity}}
+                  </div>
+                </td>
+                <td>
+                  <form method="POST" action="{{url_for('cart.update')}}">
+                    <div class="row">
+                      <input type="hidden" name="product_id" value="{{row.product_id}}" />
+                      <div class="col">
+                        ${{'%.2f' % (row.cost / 100)|float}}
+                      </div>
+                    </div>
+                  </form>
+                </td>
+                <td>
+                  ${{'%.2f' % (row.subtotal / 100)|float}}
+                </td>
+              </tr>
+              {% endfor %}
+              <tr>
+                <td><span class="fw-bold">Number of products: </span>{{order.number_of_products}}</td>
+                <td class="text-end fw-bold">Total: </td>
+                <td>
+                  ${{'%.2f' % (total / 100)|float}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <h4 class="text-center mt-5">Order unavailable</h4>
+      {% endif %}
+    </div>
+  </div>
+  {% endblock %}

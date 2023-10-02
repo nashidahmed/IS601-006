@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}
+{% if not is_edit %}
+Add Category
+{% else %}
+Edit Category
+{% endif %}
+{% endblock %}
+{% block content %}
+{% from "_formhelpers.html" import render_field %}
+<div class="container-fluid small">
+  <div class="h1 text-center my-4">
+    {% if not is_edit %}
+    Add Category
+    {% else %}
+    Edit Category
+    {% endif %}
+  </div>
+  <div>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      {{ render_field(form.name, placeholder="Enter the name of the category") }}
+      {{ form.submit(class="btn btn-primary") }}
+    </form>
+  </div>
+</div>
+{% endblock %}
